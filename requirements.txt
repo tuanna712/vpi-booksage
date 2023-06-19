@@ -1,0 +1,15 @@
+langchain
+openai
+vertexai
+google-cloud-aiplatform
+qdrant_client
+tiktoken
+docx2txt
+pypdf
+cohere
+underthesea
+chroma
+
+streamlit
+seaborn
+matplotlib
