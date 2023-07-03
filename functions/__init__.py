@@ -1,4 +1,4 @@
-from .processing import *
-from .query import *
+from ..processing import *
+from ..bookQA import *
 from .ingestion import *
 from .query import *

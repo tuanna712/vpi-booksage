@@ -6,7 +6,7 @@ from functions import *
 def tab1_main():
     #DataLoader--------------------------------------------
     uploaded_file = las_file_uploader()
-    doc = file_loading(uploaded_file)
+    PrivateDoc = DocProcessing(uploaded_file)
     
     
 def las_file_uploader():
