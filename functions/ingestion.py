@@ -1,23 +1,23 @@
+import base64, os
+import pdfplumber
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sb
-import tiktoken
+from docx import Document
 
-from langchain.document_loaders import Docx2txtLoader
-from langchain.document_loaders import PyPDFLoader
-
-from underthesea import sent_tokenize
-from underthesea import word_tokenize
-
-from langchain.chains.question_answering import load_qa_chain
-
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
-
-from langchain.embeddings import CohereEmbeddings
-
-from langchain.vectorstores import Chroma
-from langchain.vectorstores import Qdrant
-from qdrant_client import QdrantClient
-
-
+def file_loading(uploaded_file):
+    if uploaded_file is not None:
+            #Split file extension for detection of loading type
+            file_extension = os.path.splitext(uploaded_file.name)[-1]
+            #Load PDF file
+            if file_extension == ".pdf":
+                doc = pdfplumber.open(uploaded_file)
+                st.write(doc.pages[0].extract_text())
+                print('Loaded PDF file!\n')
+            #Load MS Word file
+            if file_extension in [".doc", ".docx"]:
+                doc = Document(uploaded_file)
+                paragraphs = [p.text for p in doc.paragraphs]
+                st.header("Word File Content:")
+                for paragraph in paragraphs:
+                    st.write(paragraph)
+                print('Loaded MS Word file!\n')
+            return doc

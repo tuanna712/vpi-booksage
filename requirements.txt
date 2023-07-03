@@ -9,6 +9,7 @@ pypdf
 cohere
 underthesea
 chroma
+chromadb
 
 streamlit
 seaborn
