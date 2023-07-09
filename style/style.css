@@ -4,7 +4,9 @@ a {
 }
 
 .block-container {
-    padding: 0 10px 10px 10px;
+    padding-top: 0px;
+    padding-right: 100px;
+    padding-left: 100px;
 }
 
 a:hover {
@@ -45,9 +47,9 @@ header {
 .css-et4mjn.esravye0 {
     gap: 0;
 }
-.css-5rimss.eqr7zpz4 {
+/* .css-5rimss.eqr7zpz4 {
     color: #22A699;
-}
+} */
 .css-pmz2b6.esravye0 {
     gap: 0;
 }
@@ -55,7 +57,7 @@ header {
     border: 0.5px solid rgba(49, 51, 63, 0.1);
 }
 .css-u8hs99.eqdbnj014 {
-    background-color: white;
+    background-color: rgba(240, 242, 246, 0.5);
 }
 .st-bf.st-ca.st-cy.st-bw.st-bx.st-bu {
     padding: 0;
