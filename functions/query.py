@@ -30,13 +30,12 @@ class BookQA:
         self.book_lang = book_lang
         self.top_k_searching = top_k_searching
         
-        self.qdrant_url = "https://cd6b8c5a-501f-4449-b488-ea45d252239c.us-east-1-0.aws.cloud.qdrant.io:6333"
-        self.qdrant_api_key = "arMcul7YcGwzI9AzmsvA8td7OjV1B2e2DjYl-5cfs0XgCpSx8mwY3w"
-        self.embeddings = CohereEmbeddings(model="multilingual-22-12", cohere_api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
+        self.qdrant_url = os.environ['QDRANT_URL']
+        self.qdrant_api_key = os.environ['QDRANT_API_KEY']
+        openai.api_key = os.environ['OPENAI_API_KEY']
         
-        openai_api_key = "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"
-        openai.api_key = openai_api_key
-        os.environ['OPENAI_API_KEY'] = openai_api_key
+        self.embeddings = CohereEmbeddings(model="multilingual-22-12", cohere_api_key=os.environ['COHERE_API_KEY'])
+        
         self.database_loading()
     
     def bookQnA(self, question):
