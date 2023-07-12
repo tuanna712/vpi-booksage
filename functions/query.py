@@ -10,6 +10,10 @@ import openai
 import os
 import streamlit as st
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class BookQA:
     def __init__(self, 
@@ -55,9 +59,9 @@ class BookQA:
         # print(f'Answer: {llm_answer}')
         # print(f'Response Time: {response_time}\n')
 
-        self.references()
+        refers = self.references()
 
-        return llm_answer, response_time
+        return llm_answer, response_time, refers
         
     #DATABASE-LOADING------------------------------------------------------------
     def database_loading(self):
@@ -105,6 +109,7 @@ class BookQA:
         except KeyError:
             # print("No References from this document\n")
             pass
+        return self.search_results
     #PROMPTING-------------------------------------------------------------------
     def prompting(self):
         # Merge all search results into prompt

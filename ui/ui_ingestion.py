@@ -66,3 +66,30 @@ def displayPDF(file):
     # Displaying File
     st.markdown(pdf_display, unsafe_allow_html=True)
     
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(https://i.ibb.co/LPp2TTB/logo.png);
+                background-repeat: no-repeat;
+                background-size: 230px 230px;
+                padding-top: 120px;
+                padding-left: 10px;
+                background-position: 20px 20x;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "VPI BookSage";
+                margin-left: 20px;
+                margin-top: 20px;
+                font-size: 30px;
+                position: relative;
+                top: 100px;
+                font: 30px sans-serif;
+                color: rgb(186, 38, 15);
+                text-align: center;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
