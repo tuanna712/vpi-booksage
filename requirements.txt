@@ -14,3 +14,5 @@ chromadb
 streamlit
 seaborn
 matplotlib
+
+httpx-oauth==0.3.5

@@ -12,7 +12,6 @@ st.set_page_config(# Alternate names: setup_page, page, layout
                 page_title="BookSage",  # String or None. Strings get appended with "• Streamlit". 
                 page_icon=logo,  # String, anything supported by st.image, or None.
                 )
-st.sidebar.success("BookSage")
 # --- LOAD CSS ---
 with open("./style/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
