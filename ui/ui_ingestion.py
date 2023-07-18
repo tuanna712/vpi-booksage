@@ -79,7 +79,7 @@ def add_logo():
                 background-position: 20px 20x;
             }
             [data-testid="stSidebarNav"]::before {
-                content: "VPI BookSage";
+                content: "VPI-Sage";
                 margin-left: 20px;
                 margin-top: 20px;
                 font-size: 30px;

@@ -4,13 +4,11 @@ from functions import *
 from PIL import Image
 from dotenv import load_dotenv
 
-
-
 logo = Image.open("./assets/images/logo.png")
 st.set_page_config(# Alternate names: setup_page, page, layout
                 layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
                 initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
-                page_title="BookSage",  # String or None. Strings get appended with "• Streamlit". 
+                page_title="VPI Sage",  # String or None. Strings get appended with "• Streamlit". 
                 page_icon=logo,  # String, anything supported by st.image, or None.
                 )
 # Add logo to sidebar
@@ -32,8 +30,12 @@ REDIRECT_URI = os.environ['REDIRECT_URI']
 from httpx_oauth.oauth2 import GetAccessTokenError
 if 'user_email' not in st.session_state:
     url = get_login_str()
-    st.write(f'''<h4>
-        Login: <a target="_self" href="{url}">Google</a></h4>''',
+    st.write(f'''<div style="text-align: center;">
+  <h5>
+    Login: <a target="_self" href="{url}">Google</a>
+  </h5>
+</div>
+''',
             unsafe_allow_html=True)
     if st.button("User Information", key="display_user"):
         try:
