@@ -15,7 +15,7 @@ from qdrant_client import QdrantClient
 class DocProcessing():
     def __init__(self, 
                  uploaded_file,
-                 vector_path:str='vectordb',
+                 vector_path:str='database/user_1/docs_db',
                  chunk_size:int=500,
                  chunk_overlap:int=100,
                  collection_name:str=None,

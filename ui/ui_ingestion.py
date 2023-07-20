@@ -4,6 +4,7 @@ import streamlit as st
 from functions import *
 
 def tab1_main():
+    collection_management()
     #DataLoader--------------------------------------------
     upload_form = st.form('uploader')
     with upload_form:
@@ -93,3 +94,6 @@ def add_logo():
         """,
         unsafe_allow_html=True,
     )
+    
+def collection_management():
+    pass

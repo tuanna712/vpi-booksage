@@ -44,3 +44,6 @@ if 'user_email' not in st.session_state:
             st.warning("Please login first")
 if 'user_email' in st.session_state:
     st.write(f"Welcome {st.session_state.user_email}")
+
+# --- API KEY IMPORT ---------------------------------------------------------------------
+password = st.text_input("Enter a password", type="password")
