@@ -208,15 +208,39 @@ class DocProcessing():
         print("Qdrant Database loaded from local storage\n")
         
     def chroma_vectorization(self):
+        import chromadb
+        from chromadb.utils import embedding_functions
+        # Client to connect to vector db
+        client = chromadb.PersistentClient(path=self.vector_path)
+        # Embedding function
+        cohere_ef  = embedding_functions.CohereEmbeddingFunction(
+                                    api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
+                                    model_name="multilingual-22-12")
+        # get a collection or create if it doesn't exist already
+        try:
+            _collection = client.get_or_create_collection(self.collection_name, 
+                                                      embedding_function=cohere_ef)
+        except ValueError:
+            st.warning("""Expected collection name that \n(1) contains 3-63 characters, \n(2) starts and ends with an alphanumeric character, \n(3) otherwise contains only alphanumeric characters, underscores or hyphens (-), \n(4) contains no two consecutive periods (..)""")
+            st.stop()
         if self.file_extension in [".doc", ".docx"]:
-            self.vdatabase = Chroma.from_texts(texts=self.chunks, embedding=self.embeddings, persist_directory=self.vector_path)
+            # upsert items. new items will be added, existing items will be updated.
+            _collection.upsert(
+                        ids=['id_'+str(i) for i in range(1, len(self.chunks)+1)],
+                        documents=[self.chunks[i].replace('\n', ' ') 
+                                   for i in range(len(self.chunks))],
+                        )
         elif self.file_extension in [".pdf"]:
-            self.vdatabase = Chroma.from_documents(documents=self.chunks, embedding=self.embeddings, persist_directory=self.vector_path)
-        else:
-            print('this may an error')
-        self.vdatabase.persist()
-        # self.vdatabase = None
-        print("Chroma Database located on local storage\n")
+            # define ids, metadatas and documents
+            ids = ['id_'+str(i) for i in range(1, len(self.chunks)+1)]
+            metadatas = [{'source': self.data[i].metadata['source'],
+                            'page': self.data[i].metadata['page']} for i in range(len(self.chunks))
+                         ]
+            documents = [self.chunks[i].page_content.replace('\n', ' ') for i in range(len(self.chunks))]
+            # upsert items. new items will be added, existing items will be updated.
+            _collection.upsert(ids=ids,
+                    metadatas=metadatas,
+                    documents=documents,)
         
     def chroma_loading(self):
         self.vdatabase = Chroma(persist_directory=self.vector_path, embedding_function=self.embeddings)

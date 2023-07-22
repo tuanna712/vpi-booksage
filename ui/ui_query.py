@@ -1,6 +1,6 @@
 import streamlit as st
 from functions import *
-def tab2_main():
+def ui_booksage_chat():
     ui_chat_messages()
     pass
 

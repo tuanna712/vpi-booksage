@@ -12,7 +12,7 @@ def display_single_fact(df):
                     label='Select a range of facts',
                     min_value=1, 
                     max_value=n_facts, 
-                    value=(1, 5),
+                    value=(1, 3),
                     step=1,
                     key='fact_range'
                     )

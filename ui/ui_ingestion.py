@@ -3,35 +3,35 @@ import streamlit as st
 
 from functions import *
 
-def tab1_main():
-    collection_management()
+def ingestion_params():
     #DataLoader--------------------------------------------
     upload_form = st.form('uploader')
     with upload_form:
         uploaded_file = las_file_uploader()
-        _btn = upload_form.form_submit_button('Process')
+        _btn = upload_form.form_submit_button('Process/Create/Update')
     if uploaded_file is not None and _btn:
-        if st.session_state.book_lang == 'ENG':
-            _book_lang = 'en'
-        else:
-            _book_lang = 'vi'
-        PrivateDoc = DocProcessing(uploaded_file,
-                                    chunk_size=st.session_state.chunk_size,
-                                    chunk_overlap=st.session_state.chunk_overlap,
-                                    collection_name=st.session_state.collection_name,
-                                    book_lang=_book_lang,)
-        PrivateDoc.file_processing()
-        _main_cols = st.columns(2)
-        with _main_cols[0]:
-            st.write('Chunks Histogram')
-            PrivateDoc.display_chunks_hist()
-        with _main_cols[1]:
-            # n_max_chunks = PrivateDoc.total_number_of_chunks()
-            # _num_chunk = st.number_input('Chunk Number:', min_value=1, max_value=n_max_chunks, 
-            #                                 value=n_max_chunks, key='_num_chunk')
-            # chunks = PrivateDoc.display_chunks(_num_chunk)
-            # st.write(chunks[_num_chunk-1].page_content)
-            pass
+        with st.spinner(text='Processing...'):
+            if st.session_state.book_lang == 'ENG':
+                _book_lang = 'en'
+            else:
+                _book_lang = 'vi'
+            PrivateDoc = DocProcessing(uploaded_file,
+                                        chunk_size=st.session_state.chunk_size,
+                                        chunk_overlap=st.session_state.chunk_overlap,
+                                        collection_name=st.session_state.collection_name,
+                                        book_lang=_book_lang,)
+            PrivateDoc.file_processing()
+            _main_cols = st.columns(2)
+            with _main_cols[0]:
+                st.write('Chunks Histogram')
+                PrivateDoc.display_chunks_hist()
+            with _main_cols[1]:
+                n_max_chunks = PrivateDoc.total_number_of_chunks()
+                _num_chunk = st.number_input('Chunk Number:', min_value=1, max_value=n_max_chunks, 
+                                                value=n_max_chunks, key='_num_chunk')
+                chunks = PrivateDoc.display_chunks(_num_chunk)
+                st.write(chunks[_num_chunk-1].page_content)
+                pass
     
 def las_file_uploader():
     sub_cols = st.columns(5)
@@ -95,5 +95,3 @@ def add_logo():
         unsafe_allow_html=True,
     )
     
-def collection_management():
-    pass

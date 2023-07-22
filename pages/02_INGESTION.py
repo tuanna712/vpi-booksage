@@ -12,8 +12,23 @@ st.set_page_config(# Alternate names: setup_page, page, layout
                 page_title="VPI Sage",  # String or None. Strings get appended with "• Streamlit". 
                 page_icon=logo,  # String, anything supported by st.image, or None.
                 )
-# --- LOAD CSS ---
+# --- LOAD CSS ---------------------------------------------------------------
 with open("./style/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    
-tab1_main()
+# Display title
+title_ui('COLLECTIONS')
+# --- TABS Definition ---------------------------------------------------------------
+_tab_create, _tab_review, _tab_remove = st.tabs(['Create Collection', 
+                                                 'Review Collection',
+                                                 'Remove Collection'
+                                                 ])
+
+# --- Create Collection ----------------------------
+with _tab_create:
+    ingestion_params()
+# --- Manage Collection ----------------------------
+with _tab_review:
+    collection_management()
+# --- Remove Collection ----------------------------
+with _tab_remove:
+    remove_collection()
