@@ -3,11 +3,11 @@ import streamlit as st
 
 from functions import *
 
-def ingestion_params():
+def ingestion_params(FACTS_VDB):
     #DataLoader--------------------------------------------
     upload_form = st.form('uploader')
     with upload_form:
-        uploaded_file = las_file_uploader()
+        uploaded_file = file_uploader()
         _btn = upload_form.form_submit_button('Process/Create/Update')
     if uploaded_file is not None and _btn:
         with st.spinner(text='Processing...'):
@@ -19,21 +19,29 @@ def ingestion_params():
                                         chunk_size=st.session_state.chunk_size,
                                         chunk_overlap=st.session_state.chunk_overlap,
                                         collection_name=st.session_state.collection_name,
-                                        book_lang=_book_lang,)
+                                        book_lang=_book_lang,
+                                        vector_path=FACTS_VDB,
+                                        )
             PrivateDoc.file_processing()
+            st.session_state.private_doc = PrivateDoc
+    if 'private_doc' in st.session_state:
             _main_cols = st.columns(2)
             with _main_cols[0]:
                 st.write('Chunks Histogram')
-                PrivateDoc.display_chunks_hist()
+                st.session_state.private_doc.display_chunks_hist()
             with _main_cols[1]:
-                n_max_chunks = PrivateDoc.total_number_of_chunks()
+                n_max_chunks = st.session_state.private_doc.total_number_of_chunks()
                 _num_chunk = st.number_input('Chunk Number:', min_value=1, max_value=n_max_chunks, 
                                                 value=n_max_chunks, key='_num_chunk')
-                chunks = PrivateDoc.display_chunks(_num_chunk)
-                st.write(chunks[_num_chunk-1].page_content)
+                chunks = st.session_state.private_doc.display_chunks(_num_chunk)
+                try:
+                    st.write(chunks[_num_chunk-1].page_content.replace('_', ' '))
+                except AttributeError:
+                    st.write(chunks[_num_chunk-1].replace('_', ' '))
+                    st.info('No available metadata')
                 pass
     
-def las_file_uploader():
+def file_uploader():
     sub_cols = st.columns(5)
     with sub_cols[0]:
         uploaded_file = st.file_uploader("Documents Uploader:", 
@@ -53,10 +61,10 @@ def las_file_uploader():
         st.text_input(label='Collection Name', key='collection_name')
     return uploaded_file
     
-def parameter_form():
-    parameter_form = st.form('parameters')
-    with parameter_form:
-        _btn = parameter_form.form_submit_button('Process')
+# def parameter_form():
+#     parameter_form = st.form('parameters')
+#     with parameter_form:
+#         _btn = parameter_form.form_submit_button('Process')
     
 def displayPDF(file):
     # Opening file from file path
@@ -95,3 +103,8 @@ def add_logo():
         unsafe_allow_html=True,
     )
     
+def ui_sidebar_ingestion():
+    with st.sidebar:
+        if 'user_email' in st.session_state:
+            st.write(f"User: {st.session_state.user_email}")
+    pass

@@ -4,9 +4,9 @@ import streamlit as st
 from chromadb.utils import embedding_functions
 
 
-def collection_management():
+def collection_management(FACTS_VDB):
     # Define basic params
-    FACTS_VDB = 'database/user_1/docs_db'
+    # FACTS_VDB = 'database/user_1/docs_db'
     CLIENT, COHERE_EF = define_globals(FACTS_VDB)
     # Read and call saved collections
     collections_list, collection_namelist = collection_loader(CLIENT)
@@ -17,9 +17,9 @@ def collection_management():
     # Read single collection
     read_single_collection(CLIENT, COHERE_EF, collections_list, collection_name)
     
-def remove_collection():
+def remove_collection(FACTS_VDB):
     # Define basic params
-    FACTS_VDB = 'database/user_1/docs_db'
+    # FACTS_VDB = 'database/user_1/docs_db'
     CLIENT, COHERE_EF = define_globals(FACTS_VDB)
     collections_list, collection_namelist = collection_loader(CLIENT)
     collection_name = st.selectbox('Select Collection:', 
@@ -64,17 +64,19 @@ def read_single_collection(CLIENT, COHERE_EF, collections_list, collection_name)
         # Review collection documents
         len_docs = len(query_collection.get()['documents'])
         st.write(f'Number of documents: {len_docs}')
-        
-        # Docs selection
-        doc_selection = st.number_input(label='Document ID:', 
-                                        min_value=0, max_value=len_docs-1,
-                                        value=0, key='doc_selection')
-        # Display document by ID
-        st.write(query_collection.get()['documents'][doc_selection].replace('_', ' '))
-        # Display metadata of document
-        metadata = query_collection.get()['metadatas'][doc_selection]
-        if len(metadata) > 0:
-            st.write(f'Page information: {metadata}')
+        if len_docs > 0:
+            # Docs selection
+            doc_selection = st.number_input(label='Document ID:', 
+                                            min_value=0, max_value=len_docs-1,
+                                            value=0, key='doc_selection')
+            # Display document by ID
+            st.write(query_collection.get()['documents'][doc_selection].replace('_', ' '))
+            # Display metadata of document
+            metadata = query_collection.get()['metadatas'][doc_selection]
+            if len(metadata) > 0:
+                st.write(f'Page information: {metadata}')
+        else:
+            st.info('No available documents')
             
 def title_ui(title):
     st.write(f'''<div style="text-align: center;">

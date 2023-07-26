@@ -19,24 +19,38 @@ with open("./style/style.css") as f:
     
 # Sidebar UI --------------------------------------------------------------------------
 def main():
+    # Display sidebar information
     with st.sidebar:
-        fact_ui_options = st.radio('Facts UI', ['Generater', 'Review', 'Edit', 'Database'], 
+        # Check if user is logged in---------------------------
+        if 'user_email' in st.session_state:
+            st.write(f"User: {st.session_state.user_email}")
+            USER = st.session_state.user_email.split('@')[0]
+            FACTS_JSON = f'database/{USER}/facts_db/txt_db/qadb.json'
+            FACTS_DB = f'database/{USER}/facts_db/facts_vector_db'
+        else:
+            st.warning("Please login first")
+            st.stop()
+            
+        # --- TABS Definition ---------------------------------
+        fact_ui_options = st.radio('Facts UI', ['Generator', 'Review', 'Edit', 'Database'], 
                                    key='fact_ui_options')
-
-    if fact_ui_options == 'Generater':
-        ui_facts_gen()
+    # --- UI Generator ----------------------------------------
+    if fact_ui_options == 'Generator':
+        ui_facts_gen(FACTS_JSON)
+    # --- UI Review -------------------------------------------
     if fact_ui_options == 'Review':
-        read_df = read_fact_db()
+        read_df = read_fact_db(FACTS_JSON)
         display_single_fact(read_df)
+    # --- UI Edit ---------------------------------------------
     if fact_ui_options == 'Edit':
-        read_df = read_fact_db()
-        edit_fact_db(read_df)
+        read_df = read_fact_db(FACTS_JSON)
+        edit_fact_db(read_df, FACTS_JSON)
+    # --- UI Database -----------------------------------------
     if fact_ui_options == 'Database':
-        facts_to_vectordb()
-        pass
+        facts_to_vectordb(FACTS_DB, FACTS_JSON)
 
 # --- UI 4 GEN ------------------------------------------------------------------------
-def ui_facts_gen():
+def ui_facts_gen(FACTS_JSON):
     fact_form = st.form(key='fact_form')
     editable_form = st.form(key='editable_form')
     with fact_form:
@@ -47,14 +61,14 @@ def ui_facts_gen():
             _value = ""
         # Display facts input text area
         facts_input = st.text_area('Facts Analysis:',value=_value, height=200, key="facts_input")
-        # Action button for Facts Analysis -> CALL QnA Generater
+        # Action button for Facts Analysis -> CALL QnA Generator
         fact_form_btn = fact_form.form_submit_button(label='Generate QnA')
     #  --- GENERATE QnA ---------------------------------------------------------------
     if fact_form_btn:
         with st.spinner(text='Generating QnA...'):
             try:
                 # Take QnA Action
-                _question, _answer = qna_generater_openai(facts_input)
+                _question, _answer = qna_generator_openai(facts_input)
             except ValueError:
                 st.write("Can't detect structure of LLM output . Please try again.")
     # --- EDIT QnA --------------------------------------------------------------------
@@ -65,20 +79,23 @@ def ui_facts_gen():
         
     # --- Save Facts -----------------------------------------------------------------
         if editable_form_btn:
-            save_qadb(st.session_state._llm_qst, st.session_state.llm_ans, st.session_state.facts_input)
+            save_qadb(st.session_state._llm_qst, 
+                      st.session_state.llm_ans, 
+                      st.session_state.facts_input,
+                      FACTS_JSON,)
 
 # QnA Displaying -----------------------------------------------------------------
 def qna_display(_question, _answer):
     col1, col2 = st.columns([1,2])
     # Question edit
     with col1:
-        edited_llm_qst = st.text_area('QstGenerater:', _question, height=200, key="_llm_qst")
+        edited_llm_qst = st.text_area('QstGenerator:', _question, height=200, key="_llm_qst")
     # Answer edit
     with col2:
-        edited_llm_ans = st.text_area('AnsGenerater:', _answer, height=200, key="llm_ans")
+        edited_llm_ans = st.text_area('AnsGenerator:', _answer, height=200, key="llm_ans")
     
-# QnA Generater -----------------------------------------------------------------
-def qna_generater_openai(context:str):
+# QnA Generator -----------------------------------------------------------------
+def qna_generator_openai(context:str):
     facts = context
     # Prompting
     prompt = prompting(facts)

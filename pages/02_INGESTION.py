@@ -17,18 +17,26 @@ with open("./style/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 # Display title
 title_ui('COLLECTIONS')
+# Sidebar settings -----------------------------------------------------------
+ui_sidebar_ingestion()
 # --- TABS Definition ---------------------------------------------------------------
 _tab_create, _tab_review, _tab_remove = st.tabs(['Create Collection', 
                                                  'Review Collection',
                                                  'Remove Collection'
                                                  ])
-
+# Check if user is logged in------------------------
+if 'user_email' in st.session_state:
+    USER = st.session_state.user_email.split('@')[0]
+    FACTS_VDB = f'database/{USER}/docs_db'
+else:
+    st.warning("Please login first")
+    st.stop()
 # --- Create Collection ----------------------------
 with _tab_create:
-    ingestion_params()
+    ingestion_params(FACTS_VDB)
 # --- Manage Collection ----------------------------
 with _tab_review:
-    collection_management()
+    collection_management(FACTS_VDB)
 # --- Remove Collection ----------------------------
 with _tab_remove:
-    remove_collection()
+    remove_collection(FACTS_VDB)

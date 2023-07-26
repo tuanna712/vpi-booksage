@@ -161,6 +161,7 @@ cython_debug/
 .DS_Store
 test.ipynb
 data/
+database/
 bookQA.py
 processing.py
 ui_chatmessage.py

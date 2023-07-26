@@ -17,7 +17,7 @@ load_dotenv()
 
 class BookQA:
     def __init__(self, 
-                 vector_path:str='vectordb', 
+                 vector_path:str=None, 
                  collection_name:str=None,
                  query:str=None, #Put some questions / queries here
                  llm:str='chatgpt', #Or 'palm2'
@@ -84,16 +84,28 @@ class BookQA:
         # print("Qdrant Database loaded from local storage\n")
         
     def chroma_loading(self):
-        self.vdatabase = Chroma(persist_directory=self.vector_path, embedding_function=self.embeddings)
-        # print("Chroma Database loaded from local storage\n")
-
-
+        import chromadb
+        from chromadb.utils import embedding_functions
+        CLIENT = chromadb.PersistentClient(path=self.vector_path)
+        # COHERE_EF = embedding_functions.CohereEmbeddingFunction(
+        #                                 api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
+        #                                 model_name="multilingual-22-12")
+        # collection_chroma = CLIENT.get_collection(name = self.collection_name, 
+        #                                         embedding_function = COHERE_EF)
+        
+        self.vdatabase= Chroma(
+                            client=CLIENT,
+                            persist_directory=self.vector_path,
+                            collection_name=self.collection_name,
+                            embedding_function=self.embeddings,
+                        )
     #DATABASE-SEARCHING----------------------------------------------------------
     def searching(self):
         if self.book_lang == 'vi':
             _query = word_tokenize(self.query, format="text")
         else:
             _query = self.query
+                    
         self.search_results = self.vdatabase.similarity_search_with_score(_query, k=self.top_k_searching)
         print(f'Finished Search\nTop k = {len(self.search_results)}\n')
         return self.search_results
@@ -112,9 +124,8 @@ class BookQA:
         return self.search_results
     #PROMPTING-------------------------------------------------------------------
     def prompting(self):
-        # Merge all search results into prompt
         _search_info = " --- " + " --- ".join([self.search_results[i][0].page_content 
-                                for i in range(len(self.search_results))]) + " --- "
+                                    for i in range(len(self.search_results))]) + " --- "
         #Translate to EN if using Palm2-----------------------------------
         if self.llm == 'palm2' and self.book_lang == 'vi':
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'assets/credential/ambient-hulling-389607-89c372b7af63.json'

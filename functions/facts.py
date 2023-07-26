@@ -6,8 +6,11 @@ from chromadb.utils import embedding_functions
 
 # Display single Fact----------------------------------------------------------
 def display_single_fact(df):
-    n_facts = len(df)
-    
+    try:
+        n_facts = len(df)
+    except TypeError:
+        st.warning("No facts database found, create new at 'Generator' tab")
+        st.stop()
     values = st.slider(
                     label='Select a range of facts',
                     min_value=1, 
@@ -51,7 +54,7 @@ def show_editing_fact(df, e_n_fact):
         # Answer edit
         st.text_area('Answer:', st.session_state.recall_answer_by_id, height=200, key="e_ans_db")
 # Save Edited Fact-----------------------------------------------------------
-def save_editing_fact(df, e_n_fact):
+def save_editing_fact(df, e_n_fact, FACTS_JSON):
     if 'e_ct_db' in st.session_state:
         df.loc[e_n_fact-1,'context'] = st.session_state.e_ct_db
         st.success('Context saved')
@@ -62,19 +65,19 @@ def save_editing_fact(df, e_n_fact):
         df.loc[e_n_fact-1,'answer'] = st.session_state.e_ans_db
         st.success('Updated Answer')
     # Save to json file
-    df.to_json('database/user_1/facts_db/txt_db/qadb.json')
+    df.to_json(FACTS_JSON)
     st.success('Saved to database')
         
 # Remove Fact-----------------------------------------------------------
-def delete_editing_fact(df, e_n_fact):
+def delete_editing_fact(df, e_n_fact,FACTS_JSON):
     df = df.drop([e_n_fact-1]).reset_index(drop=True)
-    df.to_json('database/user_1/facts_db/txt_db/qadb.json')
+    df.to_json(FACTS_JSON)
     st.warning('The fact has been deleted and the fact order has been updated')
 
 # Read Facts DB-----------------------------------------------------------
-def read_fact_db():
+def read_fact_db(FACTS_JSON):
     #check if /qadb/qadb.json is file
-    qadb_path = 'database/user_1/facts_db/txt_db/qadb.json'
+    qadb_path = FACTS_JSON
     if os.path.isfile(qadb_path):
         #load qadb.json file as a pandas df
         read_df = pd.read_json(qadb_path)
@@ -83,7 +86,7 @@ def read_fact_db():
         st.info("No facts database found")
         
 # Edit Facts DB-----------------------------------------------------------
-def edit_fact_db(df):
+def edit_fact_db(df, FACTS_JSON):
     st.write(f'''<div style="text-align: center;">
                     <h5 style="color: #1D5B79;
                                 font-size: 40px; 
@@ -112,16 +115,15 @@ def edit_fact_db(df):
             delete_fact_btn = st.button('Delete', key='delete_fact_btn')
         if save_fact_btn:
             try:
-                save_editing_fact(df, e_n_fact)
+                save_editing_fact(df, e_n_fact, FACTS_JSON)
             except AttributeError:
                 st.warning('You have not edited anything yet')
         if delete_fact_btn:
-            delete_editing_fact(df, e_n_fact)
+            delete_editing_fact(df, e_n_fact, FACTS_JSON)
     
 # Save Facts DB -----------------------------------------------------------------
-def save_qadb(_question:str, _answer:str, context:str):
-    # Check if /qadb/qadb.json is file
-    qadb_path = 'database/user_1/facts_db/txt_db/qadb.json'
+def save_qadb(_question:str, _answer:str, context:str, qadb_path:str):
+    # Check if qadb_path is file
     if os.path.isfile(qadb_path):
         df = pd.read_json(qadb_path)
     else:
@@ -141,7 +143,7 @@ def save_qadb(_question:str, _answer:str, context:str):
     st.success("Saved to database")
     
 # Facts VectorDB-----------------------------------------------------------
-def facts_to_vectordb():
+def facts_to_vectordb(FACTS_DB, FACTS_JSON):
     question_list:list = None
     # Display title
     st.write(f'''<div style="text-align: center;">
@@ -154,9 +156,9 @@ def facts_to_vectordb():
             ''',
                 unsafe_allow_html=True)
     # Define facts vector db path
-    facts_vdb_path = 'database/user_1/facts_db/facts_vector_db'
+    facts_vdb_path = FACTS_DB
     # Check if text db existed
-    qadb_path = 'database/user_1/facts_db/txt_db/qadb.json'
+    qadb_path = FACTS_JSON
     # Action for loading facts db
     if os.path.isfile(qadb_path):
         df = pd.read_json(qadb_path)

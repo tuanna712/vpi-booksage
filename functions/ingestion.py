@@ -103,16 +103,16 @@ class DocProcessing():
         #Split to Smaller Texts
         text_splitter = RecursiveCharacterTextSplitter(
                                 chunk_size=self.chunk_size,
-                                chunk_overlap=self.chunk_overlap, #Overlaping = 40% of Chunksize
+                                chunk_overlap=self.chunk_overlap,
                                 length_function=self.tiktoken_len,
-                                # separators=['\n'],
                                 separators=['\n\n\n\n','\n\n\n','\n\n', '\n', ' ', ''],
                                 )
         ##Process-MS WORD---------------------------
         if self.file_extension in [".doc", ".docx"]:
             self.chunks = text_splitter.split_text(self.data)
             if self.book_lang=='vi':
-                self.chunks = [word_tokenize(self.chunks[i], format="text") for i in range(len(self.chunks))]
+                self.chunks = [word_tokenize(self.chunks[i], format="text") 
+                               for i in range(len(self.chunks))]
             print(len(self.data))
             print(len(self.chunks))
         ##Process-PDF-------------------------------
@@ -233,8 +233,8 @@ class DocProcessing():
         elif self.file_extension in [".pdf"]:
             # define ids, metadatas and documents
             ids = ['id_'+str(i) for i in range(1, len(self.chunks)+1)]
-            metadatas = [{'source': self.data[i].metadata['source'],
-                            'page': self.data[i].metadata['page']} for i in range(len(self.chunks))
+            metadatas = [{'source': self.chunks[j].metadata['source'],
+                            'page': self.chunks[j].metadata['page']} for j in range(len(self.chunks))
                          ]
             documents = [self.chunks[i].page_content.replace('\n', ' ') for i in range(len(self.chunks))]
             # upsert items. new items will be added, existing items will be updated.
@@ -242,7 +242,7 @@ class DocProcessing():
                     metadatas=metadatas,
                     documents=documents,)
         
-    def chroma_loading(self):
-        self.vdatabase = Chroma(persist_directory=self.vector_path, embedding_function=self.embeddings)
-        print("Chroma Database loaded from local storage\n")
+    # def chroma_loading(self):
+    #     self.vdatabase = Chroma(persist_directory=self.vector_path, embedding_function=self.embeddings)
+    #     print("Chroma Database loaded from local storage\n")
 

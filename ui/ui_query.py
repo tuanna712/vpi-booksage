@@ -1,10 +1,27 @@
 import streamlit as st
 from functions import *
 def ui_booksage_chat():
-    ui_chat_messages()
+    if 'bs_collection_dropdown' in st.session_state:
+        collection_name = st.session_state.bs_collection_dropdown
+    if 'bs_book_lang_selected' in st.session_state:
+        book_lang = st.session_state.bs_book_lang_selected
+        if book_lang == 'ENG':
+            book_lang = 'en'
+        else:
+            book_lang = 'vi'
+    if 'bs_llm_selected' in st.session_state:
+        llm = st.session_state.bs_llm_selected
+        if llm == 'OPENAI 3.5':
+            llm = 'openai'
+        elif llm == 'GOOGLE PAML 2':
+            llm = 'paml2'
+    if 'bs_top_k_selected' in st.session_state:
+        top_k = st.session_state.bs_top_k_selected
+    
+    ui_chat_messages(collection_name, book_lang, llm, top_k)
     pass
 
-def ui_chat_messages():
+def ui_chat_messages(collection_name, book_lang, llm, top_k):
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -23,10 +40,14 @@ def ui_chat_messages():
             message_placeholder = st.empty()
             full_response = ""
             # LLM here
-            BookQnA = BookQA(llm='chatgpt',
-                        book_lang='en',
+            BookQnA = BookQA(llm=llm,
+                        vector_path=st.session_state.FACTS_VDB,
+                        book_lang=book_lang,
+                        collection_name=collection_name,
+                        top_k_searching=top_k,
                         )
-            llm_answer, response_time, refers = BookQnA.bookQnA(prompt)
+            with st.spinner(text='Responding...'):
+                llm_answer, response_time, refers = BookQnA.bookQnA(prompt)
             # Save to ui response here
             full_response += llm_answer
             message_placeholder.markdown(full_response + "▌")
@@ -36,7 +57,10 @@ def ui_chat_messages():
     if refers is not None:
         refers_content:str = ''
         for i in range(len(refers)):
-            _chunk_content = refers[i][0].page_content
+            if book_lang == 'vi':
+                _chunk_content = refers[i][0].page_content.replace("_", " ")
+            else:
+                _chunk_content = refers[i][0].page_content
             try:
                 _pdf_name = refers[i][0].metadata["source"].split("/")[-1]
                 _ref_page = refers[i][0].metadata["page"]

@@ -1,4 +1,4 @@
-langchain
+langchain===0.0.239
 openai
 vertexai
 google-cloud-aiplatform
@@ -10,9 +10,12 @@ cohere
 underthesea
 chroma
 chromadb
-
-streamlit
+pydantic==1.10.7
+google-cloud-translate
+streamlit==1.24.0
+pdfplumber
+python-docx
 seaborn
 matplotlib
-
+plotly
 httpx-oauth==0.3.5
