@@ -11,6 +11,7 @@ import os
 import streamlit as st
 from datetime import datetime
 from dotenv import load_dotenv
+from anthropic import Anthropic
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,7 +21,7 @@ class BookQA:
                  vector_path:str=None, 
                  collection_name:str=None,
                  query:str=None, #Put some questions / queries here
-                 llm:str='chatgpt', #Or 'palm2'
+                 llm:str='chatgpt', #Or 'palm2' # or 'claude'
                  vmethod:str='chroma',
                  book_lang:str='en',
                  top_k_searching:int=5,
@@ -33,6 +34,8 @@ class BookQA:
         self.llm = llm
         self.book_lang = book_lang
         self.top_k_searching = top_k_searching
+        
+        self.ANTHROPIC_API_KEY = os.environ['ANTHROPIC_API_KEY']
         
         self.qdrant_url = os.environ['QDRANT_URL']
         self.qdrant_api_key = os.environ['QDRANT_API_KEY']
@@ -51,9 +54,12 @@ class BookQA:
         if self.llm == 'palm2':
             # print('Google Responding...\n')
             llm_answer, response_time = self.responding_google()
-        else:
+        elif self.llm == 'chatgpt':
             # print('OpenAI Responding...\n')
             llm_answer, response_time = self.responding_openai()
+        elif self.llm == 'claude':
+            # print('Claude Responding...\n')
+            llm_answer, response_time = self.responding_claude()
 
         # print(f'Question: {self.query}\n')
         # print(f'Answer: {llm_answer}')
@@ -267,3 +273,19 @@ class BookQA:
         # print(textwrap.fill(res, width=100))
         self.palm2_response_time = datetime.now() - _start
         return res
+    
+    #---CLAUDE-RESPONSE-----------------------------------------------
+    def responding_claude(self):
+        client = Anthropic(api_key=self.ANTHROPIC_API_KEY)
+        HUMAN_PROMPT = f"\n\nHuman: {self.prompt}"
+        AI_PROMPT = "\n\nAssistant:"
+        completion = client.completions.create(
+            model="claude-1",
+            max_tokens_to_sample=2000,
+            temperature=0.1,
+            prompt=f"{HUMAN_PROMPT} {AI_PROMPT}",
+        )
+        
+        self.results = completion.completion
+        return self.results, None
+        

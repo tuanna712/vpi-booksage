@@ -28,7 +28,7 @@ def ui_booksage_sidebar():
                                  key='bs_book_lang_selected')
         # Select LLM
         llm = st.radio(label='Select LLM:',
-                        options=['OPENAI 3.5', 'GOOGLE PAML 2'],
+                        options=['OPENAI 3.5', 'GOOGLE PAML 2', 'CLAUDE'],
                         key='bs_llm_selected')
         # Select Top k
         top_k = st.slider(label='Select Top k:',

@@ -15,6 +15,8 @@ def ui_booksage_chat():
             llm = 'openai'
         elif llm == 'GOOGLE PAML 2':
             llm = 'paml2'
+        elif llm == 'CLAUDE':
+            llm = 'claude'
     if 'bs_top_k_selected' in st.session_state:
         top_k = st.session_state.bs_top_k_selected
     
@@ -73,5 +75,4 @@ def ui_chat_messages(collection_name, book_lang, llm, top_k):
                                height=300,
                                label_visibility="collapsed",
                                )
-            # st.write(txt)    
         
