@@ -10,6 +10,8 @@ def ui_booksage_sidebar():
         if 'user_email' in st.session_state:
             st.write(f"User email: {st.session_state.user_email}")
             USER = st.session_state.user_email.split('@')[0]
+            st.session_state.user = USER
+            
         else:
             st.warning("Please login first")
             st.stop()
@@ -28,7 +30,7 @@ def ui_booksage_sidebar():
                                  key='bs_book_lang_selected')
         # Select LLM
         llm = st.radio(label='Select LLM:',
-                        options=['OPENAI 3.5', 'GOOGLE PAML 2', 'CLAUDE'],
+                        options=['OPENAI 3.5', 'GOOGLE PALM 2', 'CLAUDE'],
                         key='bs_llm_selected')
         # Select Top k
         top_k = st.slider(label='Select Top k:',

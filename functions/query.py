@@ -6,6 +6,8 @@ from langchain.embeddings import CohereEmbeddings
 from underthesea import word_tokenize
 from qdrant_client import QdrantClient
 from langchain.vectorstores import Qdrant
+import chromadb
+from chromadb.utils import embedding_functions
 import openai
 import os
 import streamlit as st
@@ -19,6 +21,7 @@ load_dotenv()
 class BookQA:
     def __init__(self, 
                  vector_path:str=None, 
+                 user:str=None,
                  collection_name:str=None,
                  query:str=None, #Put some questions / queries here
                  llm:str='chatgpt', #Or 'palm2' # or 'claude'
@@ -28,6 +31,8 @@ class BookQA:
                  ):
         
         self.vector_path = vector_path
+        self.fact_path = f'database/{user}/facts_db/facts_vector_db'
+        self.fact_json = f'database/{user}/facts_db/txt_db/qadb.json'
         self.collection_name = collection_name
         self.vmethod = vmethod
         # self.query = query
@@ -48,24 +53,24 @@ class BookQA:
     def bookQnA(self, question):
         self.query = question
         self.searching()
+        
+        self.matched_ans, self.matching_score = self.facts_matching()
 
-        self.prompting()
+        if self.matching_score < 5: 
+            llm_answer, response_time, refers = self.matched_ans, 0, ['faq', 'FAQ']    
+        else:
+            self.prompting()
+            if self.llm == 'palm2':
+                # print('Google Responding...\n')
+                llm_answer, response_time = self.responding_google()
+            elif self.llm == 'openai':
+                # print('OpenAI Responding...\n')
+                llm_answer, response_time = self.responding_openai()
+            elif self.llm == 'claude':
+                # print('Claude Responding...\n')
+                llm_answer, response_time = self.responding_claude()
 
-        if self.llm == 'palm2':
-            # print('Google Responding...\n')
-            llm_answer, response_time = self.responding_google()
-        elif self.llm == 'chatgpt':
-            # print('OpenAI Responding...\n')
-            llm_answer, response_time = self.responding_openai()
-        elif self.llm == 'claude':
-            # print('Claude Responding...\n')
-            llm_answer, response_time = self.responding_claude()
-
-        # print(f'Question: {self.query}\n')
-        # print(f'Answer: {llm_answer}')
-        # print(f'Response Time: {response_time}\n')
-
-        refers = self.references()
+            refers = self.references()
 
         return llm_answer, response_time, refers
         
@@ -128,6 +133,37 @@ class BookQA:
             # print("No References from this document\n")
             pass
         return self.search_results
+    #FACTS MATCHING-------------------------------------------------------------------
+    def facts_matching(self):
+        import pandas as pd
+        if os.path.isfile(self.fact_json):
+            df = pd.read_json(self.fact_json)
+        else:
+            st.warning("No facts database found")
+        client = chromadb.PersistentClient(path=self.fact_path)
+        cohere_ef  = embedding_functions.CohereEmbeddingFunction(
+                                    api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
+                                    model_name="multilingual-22-12")
+        # Action for embedding facts
+        try:
+            collection_name = client.list_collections()[0].name
+            query_collection = client.get_collection(name = collection_name, 
+                                                embedding_function = cohere_ef)
+        except ValueError:
+            st.warning("There is no collection in the database. Please ingest the collection first!")
+        
+        results = query_collection.query(
+            query_texts=[self.query],
+            n_results=3,
+        )  
+        matching_score = round(results['distances'][0][0], 2)   
+        if matching_score < 40:
+            matched_question = results['documents'][0][0]
+            row_index = df.index[df['question'] == matched_question].tolist()[0]
+            matched_ans = df.loc[row_index, 'answer']
+        else:
+            matched_ans = ''
+        return matched_ans, matching_score
     #PROMPTING-------------------------------------------------------------------
     def prompting(self):
         _search_info = " --- " + " --- ".join([self.search_results[i][0].page_content 
@@ -140,13 +176,12 @@ class BookQA:
             _search_info = _search_info.replace("_"," ")
             translated_search_info = self.translate_text(_search_info, target_language_code='en')
             _search_info = translated_search_info.translated_text
-
         self.prompt = f"""
         You will be provided with the question which is delimited by XML tags and the \
         context delimited by triple backticks. 
-        The context contains 5 long paragraphs which delimited by triple dash. \
+        The context contains 5 long paragraphs and 1 reference which delimited by triple dash. \
         <tag>{self.query}</tag>
-        ````{_search_info}```
+        ````\n{_search_info}```\n{self.matched_ans}\n```
         """
         # Follow the below steps to find the answer for the question:
         # If the long paragraph has a structure of a Menu page, lets ignore this paragraph.
@@ -276,6 +311,7 @@ class BookQA:
     
     #---CLAUDE-RESPONSE-----------------------------------------------
     def responding_claude(self):
+        _start = datetime.now()
         client = Anthropic(api_key=self.ANTHROPIC_API_KEY)
         HUMAN_PROMPT = f"\n\nHuman: {self.prompt}"
         AI_PROMPT = "\n\nAssistant:"
@@ -287,5 +323,7 @@ class BookQA:
         )
         
         self.results = completion.completion
-        return self.results, None
+        self.claude_response_time = (datetime.now() - _start)
+        
+        return self.results, self.claude_response_time
         

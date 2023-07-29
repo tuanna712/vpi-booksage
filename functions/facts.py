@@ -3,6 +3,8 @@ import chromadb
 import pandas as pd
 import streamlit as st
 from chromadb.utils import embedding_functions
+from langchain.vectorstores import Chroma
+from langchain.embeddings import CohereEmbeddings
 
 # Display single Fact----------------------------------------------------------
 def display_single_fact(df):
@@ -191,6 +193,15 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
             ids=['id_'+str(i) for i in range(1, len(question_list)+1)],
             documents=question_list,
         )
+        # langchain_embeddings = CohereEmbeddings(model="multilingual-22-12", 
+        #                                         cohere_api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
+        
+        # st.session_state.langchain_chroma_db = Chroma(
+        #                         client=client,
+        #                         collection_name=collection_name,
+        #                         embedding_function=langchain_embeddings,
+        #                     )
+        # st.write("There are", st.session_state.langchain_chroma_db._collection.count(), "in the collection")
         st.success("Facts vector database created/updated")
     # ---------------------------------------------
     # Input question from user
@@ -202,15 +213,18 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
         collection_name = client.list_collections()[0].name
         query_collection = client.get_collection(name = collection_name, 
                                             embedding_function = cohere_ef)
+        n_results=3
         results = query_collection.query(
             query_texts=[st.session_state.input_question],
-            n_results=3,
+            n_results=n_results,
         )  
-        
+        # results = st.session_state.langchain_chroma_db.similarity_search_with_score(query=st.session_state.input_question, 
+                                                                            # k=3)
         st.info(f"Top 3 relevant questions are: \n\
                 \n 01. {results['documents'][0][0]} - Score: {round(results['distances'][0][0], 2)}\
                 \n 02. {results['documents'][0][1]} - Score: {round(results['distances'][0][1], 2)}\
                 \n 03. {results['documents'][0][2]} - Score: {round(results['distances'][0][2], 2)}\
                     ")
-        
-        
+        for i in range(n_results):
+            row_index = df.index[df['question'] == results['documents'][0][i]].tolist()[0]
+            st.warning(df.loc[row_index, 'answer'])
