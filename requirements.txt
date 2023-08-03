@@ -18,5 +18,6 @@ python-docx
 seaborn
 matplotlib
 plotly
-httpx-oauth==0.3.5
 anthropic==0.3.4
+Office365-REST-Python-Client==2.3.16
+httpx-oauth

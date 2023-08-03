@@ -44,6 +44,28 @@ if 'user_email' not in st.session_state:
             st.warning("Please login first")
 if 'user_email' in st.session_state:
     st.write(f"Welcome {st.session_state.user_email}")
+else:
+    st.warning("Please login first")
+    st.stop()
 
-# --- API KEY IMPORT ---------------------------------------------------------------------
+# --- API KEY IMPORT ------------------------------------------------------------------
 # password = st.text_input("Enter a password", type="password")
+
+# --- SYNCHRONIZE ---------------------------------------------------------------------
+userSync = DatabaseLink(st.session_state.user_email)
+st.write(f"User: {userSync.username}")
+_home_columns = st.columns(2)
+with _home_columns[0]:
+    upload = st.button("Sync Upload", key="sync_upload")
+with _home_columns[1]:
+    download = st.button("Sync Download", key="sync_download")
+
+if upload:
+    with st.spinner('Uploading...'):
+        userSync.upload_overwrite()
+    st.success("Upload successfully")
+    
+if download:
+    with st.spinner('Downloading...'):
+        userSync.download_overwrite()
+    st.success("Download successfully")
