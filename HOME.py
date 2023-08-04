@@ -1,8 +1,10 @@
 import streamlit as st
 from ui import *
-from functions import *
+from .functions.auth import *
+from .functions.sharePointConnector import *
 from PIL import Image
 from dotenv import load_dotenv
+import os
 
 logo = Image.open("./assets/images/logo.png")
 st.set_page_config(# Alternate names: setup_page, page, layout
