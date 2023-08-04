@@ -62,7 +62,10 @@ class BookQA:
             self.prompting()
             if self.llm == 'palm2':
                 # print('Google Responding...\n')
-                llm_answer, response_time = self.responding_google()
+                try:
+                    llm_answer, response_time = self.responding_google()
+                except InvalidArgument:
+                    pass
             elif self.llm == 'openai':
                 # print('OpenAI Responding...\n')
                 llm_answer, response_time = self.responding_openai()
@@ -167,7 +170,7 @@ class BookQA:
     #PROMPTING-------------------------------------------------------------------
     def prompting(self):
         _search_info = " --- " + " --- ".join([self.search_results[i][0].page_content 
-                                    for i in range(len(self.search_results))]) + " --- "
+                                      for i in range(len(self.search_results))]) + " --- "
         #Translate to EN if using Palm2-----------------------------------
         if self.llm == 'palm2' and self.book_lang == 'vi':
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'assets/credential/ambient-hulling-389607-89c372b7af63.json'
