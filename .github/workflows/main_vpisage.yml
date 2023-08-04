@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'vpisage'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D2058211BC1043E1800143AD1213FE5D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_775448175008451C8E6DCC12338082C6 }}
