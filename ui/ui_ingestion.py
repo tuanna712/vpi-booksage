@@ -1,7 +1,7 @@
 import base64
 import streamlit as st
 
-from functions import *
+from functions.ingestion import *
 
 def ingestion_params(FACTS_VDB):
     #DataLoader--------------------------------------------
