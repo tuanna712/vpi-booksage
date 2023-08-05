@@ -1,14 +1,15 @@
+import os
+from PIL import Image
 import streamlit as st
+from dotenv import load_dotenv
+from msal_streamlit_authentication import msal_authentication
+
+from .functions.sharePointConnector import *
+from .functions.auth import *
 from .ui.ui_ingestion import *
 from .ui.ui_ingest_collection import *
 from .ui.ui_query import *
 from .ui.ui_booksage import *
-from .functions.sharePointConnector import *
-from .functions.auth import *
-from msal_streamlit_authentication import msal_authentication
-from PIL import Image
-from dotenv import load_dotenv
-import os
 
 logo = Image.open("./assets/images/logo.png")
 st.set_page_config(# Alternate names: setup_page, page, layout
