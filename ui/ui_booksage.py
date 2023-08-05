@@ -2,7 +2,7 @@ import chromadb
 import pandas as pd
 import streamlit as st
 from chromadb.utils import embedding_functions
-from .ui_ingest_collection import *
+from ui_ingest_collection import *
 import time
 
 def ui_booksage_sidebar():
