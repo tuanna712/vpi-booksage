@@ -1,4 +1,8 @@
+import sys
 import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(script_dir)
+
 from PIL import Image
 import streamlit as st
 from dotenv import load_dotenv
