@@ -4,6 +4,7 @@ from .ui.ui_ingest_collection import *
 from .ui.ui_query import *
 from .ui.ui_booksage import *
 from .functions.sharePointConnector import *
+from .functions.auth import *
 from msal_streamlit_authentication import msal_authentication
 from PIL import Image
 from dotenv import load_dotenv
