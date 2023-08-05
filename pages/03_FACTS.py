@@ -1,7 +1,6 @@
 import json
 import pandas as pd
 import streamlit as st
-from ui import *
 from functions.facts import *
 from PIL import Image
 

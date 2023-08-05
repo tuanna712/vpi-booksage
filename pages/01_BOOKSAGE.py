@@ -1,6 +1,7 @@
 import streamlit as st
 from functions import *
-from ui import *
+from ui.ui_booksage import *
+from ui.ui_query import *
 from PIL import Image
 
 # add_logo()
