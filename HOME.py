@@ -37,7 +37,9 @@ CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
 CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 REDIRECT_URI = os.environ['REDIRECT_URI']
 # --- LOGIN ---------------------------------------------------------------------
-st.session_state.user_email = 'tuanna712@gmail.com'
+st.text_input(label='Enter your email:',
+              value='vpi_user_name@vpi.pvn.vn',
+              key='user_email')
 # --- LOGIN ---------------------------------------------------------------------
 # from httpx_oauth.oauth2 import GetAccessTokenError
 # if 'user_email' not in st.session_state:
@@ -61,28 +63,28 @@ st.session_state.user_email = 'tuanna712@gmail.com'
 #     st.stop()
 
 # --- MSAL AUTHENTICATION ------------------------------------------------------------------
-login_token = msal_authentication(
-    auth={
-        "clientId": "d0f682f2-6d52-4160-96ba-e44272dffd47",
-        "authority": "https://login.microsoftonline.com/c5ec5abe-76c1-46cb-b3fe-c3b0071ffdb3",
-        "redirectUri": "https://vpisage.azurewebsites.net/",
-        "postLogoutRedirectUri": "https://vpisage.azurewebsites.net//"
-    }, # Corresponds to the 'auth' configuration for an MSAL Instance
-    cache={
-        "cacheLocation": "sessionStorage",
-        "storeAuthStateInCookie": False
-    }, # Corresponds to the 'cache' configuration for an MSAL Instance
-    login_request={
-        "scopes": ["d0f682f2-6d52-4160-96ba-e44272dffd47/.default"]
-    }, # Optional
-    logout_request={}, # Optional
-    login_button_text="Login", # Optional, defaults to "Login"
-    logout_button_text="Logout", # Optional, defaults to "Logout"
-    class_name="css_button_class_selector", # Optional, defaults to None. Corresponds to HTML class.
-    html_id="html_id_for_button", # Optional, defaults to None. Corresponds to HTML id.
-    key=1 # Optional if only a single instance is needed
-)
-st.write("Recevied login token:", login_token)
+# login_token = msal_authentication(
+#     auth={
+#         "clientId": "d0f682f2-6d52-4160-96ba-e44272dffd47",
+#         "authority": "https://login.microsoftonline.com/c5ec5abe-76c1-46cb-b3fe-c3b0071ffdb3",
+#         "redirectUri": "https://vpisage.azurewebsites.net/",
+#         "postLogoutRedirectUri": "https://vpisage.azurewebsites.net//"
+#     }, # Corresponds to the 'auth' configuration for an MSAL Instance
+#     cache={
+#         "cacheLocation": "sessionStorage",
+#         "storeAuthStateInCookie": False
+#     }, # Corresponds to the 'cache' configuration for an MSAL Instance
+#     login_request={
+#         "scopes": ["d0f682f2-6d52-4160-96ba-e44272dffd47/.default"]
+#     }, # Optional
+#     logout_request={}, # Optional
+#     login_button_text="Login", # Optional, defaults to "Login"
+#     logout_button_text="Logout", # Optional, defaults to "Logout"
+#     class_name="css_button_class_selector", # Optional, defaults to None. Corresponds to HTML class.
+#     html_id="html_id_for_button", # Optional, defaults to None. Corresponds to HTML id.
+#     key=1 # Optional if only a single instance is needed
+# )
+# st.write("Recevied login token:", login_token)
 
 # --- SYNCHRONIZE ---------------------------------------------------------------------
 userSync = DatabaseLink(st.session_state.user_email)
