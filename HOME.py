@@ -36,28 +36,29 @@ load_dotenv()
 CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
 CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 REDIRECT_URI = os.environ['REDIRECT_URI']
-
 # --- LOGIN ---------------------------------------------------------------------
-from httpx_oauth.oauth2 import GetAccessTokenError
-if 'user_email' not in st.session_state:
-    url = get_login_str()
-    st.write(f'''<div style="text-align: center;">
-  <h5>
-    Login: <a target="_self" href="{url}">Google</a>
-  </h5>
-</div>
-''',
-            unsafe_allow_html=True)
-    if st.button("User Information", key="display_user"):
-        try:
-            get_user()
-        except GetAccessTokenError:
-            st.warning("Please login first")
-if 'user_email' in st.session_state:
-    st.write(f"Welcome {st.session_state.user_email}")
-else:
-    st.warning("Please login first")
-    st.stop()
+st.session_state.user_email = 'tuanna712@gmail.com'
+# --- LOGIN ---------------------------------------------------------------------
+# from httpx_oauth.oauth2 import GetAccessTokenError
+# if 'user_email' not in st.session_state:
+#     url = get_login_str()
+#     st.write(f'''<div style="text-align: center;">
+#   <h5>
+#     Login: <a target="_self" href="{url}">Google</a>
+#   </h5>
+# </div>
+# ''',
+#             unsafe_allow_html=True)
+#     if st.button("User Information", key="display_user"):
+#         try:
+#             get_user()
+#         except GetAccessTokenError:
+#             st.warning("Please login first")
+# if 'user_email' in st.session_state:
+#     st.write(f"Welcome {st.session_state.user_email}")
+# else:
+#     st.warning("Please login first")
+#     st.stop()
 
 # --- MSAL AUTHENTICATION ------------------------------------------------------------------
 login_token = msal_authentication(
