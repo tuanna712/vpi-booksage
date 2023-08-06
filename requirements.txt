@@ -2,7 +2,7 @@ langchain===0.0.239
 openai
 vertexai
 google-cloud-aiplatform
-qdrant_client
+qdrant-client
 tiktoken
 docx2txt
 pypdf

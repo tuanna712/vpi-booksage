@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import streamlit as st
-from functions.facts import *
+from functions.facts_qdrant import *
 from PIL import Image
 
 logo = Image.open("./assets/images/logo.png")

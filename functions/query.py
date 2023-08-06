@@ -1,19 +1,24 @@
-import vertexai
-from vertexai.preview.language_models import TextGenerationModel
-from google.cloud import translate
-from langchain.vectorstores import Chroma
-from langchain.embeddings import CohereEmbeddings
-from underthesea import word_tokenize
-from qdrant_client import QdrantClient
-from langchain.vectorstores import Qdrant
-import chromadb
-from chromadb.utils import embedding_functions
-import openai
 import os
+import openai
 import streamlit as st
 from datetime import datetime
 from dotenv import load_dotenv
+
+import chromadb
+from chromadb.utils import embedding_functions
+
+from underthesea import word_tokenize
+from qdrant_client import QdrantClient
+
 from anthropic import Anthropic
+
+import vertexai
+from google.cloud import translate
+from vertexai.preview.language_models import TextGenerationModel
+
+from langchain.vectorstores import Qdrant
+from langchain.vectorstores import Chroma
+from langchain.embeddings import CohereEmbeddings
 
 # Load environment variables from .env file
 load_dotenv()
