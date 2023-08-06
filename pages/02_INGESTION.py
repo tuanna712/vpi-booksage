@@ -2,6 +2,7 @@ import streamlit as st
 from functions import *
 from ui.ui_booksage import *
 from ui.ui_ingestion import *
+from ui.ui_ingest_collection import *
 
 from PIL import Image
 

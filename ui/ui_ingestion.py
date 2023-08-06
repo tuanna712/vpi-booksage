@@ -61,48 +61,6 @@ def file_uploader():
         st.text_input(label='Collection Name', key='collection_name')
     return uploaded_file
     
-# def parameter_form():
-#     parameter_form = st.form('parameters')
-#     with parameter_form:
-#         _btn = parameter_form.form_submit_button('Process')
-    
-def displayPDF(file):
-    # Opening file from file path
-    with open(file, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    # Embedding PDF in HTML, PDF file <2MB
-    pdf_display =  F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>' 
-    # Displaying File
-    st.markdown(pdf_display, unsafe_allow_html=True)
-    
-def add_logo():
-    st.markdown(
-        """
-        <style>
-            [data-testid="stSidebarNav"] {
-                background-image: url(https://i.ibb.co/LPp2TTB/logo.png);
-                background-repeat: no-repeat;
-                background-size: 230px 230px;
-                padding-top: 120px;
-                padding-left: 10px;
-                background-position: 20px 20x;
-            }
-            [data-testid="stSidebarNav"]::before {
-                content: "VPI-Sage";
-                margin-left: 20px;
-                margin-top: 20px;
-                font-size: 30px;
-                position: relative;
-                top: 100px;
-                font: 30px sans-serif;
-                color: rgb(186, 38, 15);
-                text-align: center;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-    
 def ui_sidebar_ingestion():
     with st.sidebar:
         if 'user_email' in st.session_state:

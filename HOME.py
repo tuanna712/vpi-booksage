@@ -10,10 +10,10 @@ from msal_streamlit_authentication import msal_authentication
 
 from functions.sharePointConnector import *
 from functions.auth import *
-from ui.ui_ingestion import *
-from ui.ui_ingest_collection import *
-from ui.ui_query import *
-from ui.ui_booksage import *
+# from ui.ui_ingestion import *
+# from ui.ui_ingest_collection import *
+# from ui.ui_query import *
+# from ui.ui_booksage import *
 
 logo = Image.open("./assets/images/logo.png")
 st.set_page_config(# Alternate names: setup_page, page, layout

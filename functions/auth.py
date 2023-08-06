@@ -47,3 +47,32 @@ def get_user() -> void:
     st.session_state.user_id, st.session_state.user_email = asyncio.run(
         get_email(client, token['access_token'])
         )
+    
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(https://i.ibb.co/LPp2TTB/logo.png);
+                background-repeat: no-repeat;
+                background-size: 230px 230px;
+                padding-top: 120px;
+                padding-left: 10px;
+                background-position: 20px 20x;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "VPI-Sage";
+                margin-left: 20px;
+                margin-top: 20px;
+                font-size: 30px;
+                position: relative;
+                top: 100px;
+                font: 30px sans-serif;
+                color: rgb(186, 38, 15);
+                text-align: center;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    

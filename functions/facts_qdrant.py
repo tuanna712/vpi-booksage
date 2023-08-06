@@ -187,7 +187,7 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
     qdrant_api_key = "yLaJqjcyqel5R_mxJrD8RGXSYxljl52MRTC8t-eFzpEyiOdcspLqgA"
     client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
     if 'user_email' in st.session_state:
-        collection_name = st.session_state.user_email.split('@')[0] + 'factsdb'
+        collection_name = st.session_state.user_email.split('@')[0] + '_factsdb'
     else:
         st.warning('Please login first!!!')
         st.stop()
