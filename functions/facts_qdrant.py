@@ -96,6 +96,11 @@ def read_fact_db(FACTS_JSON):
         
 # Edit Facts DB-----------------------------------------------------------
 def edit_fact_db(df, FACTS_JSON):
+    try:
+        check_df = len(df)
+    except TypeError:
+        st.info("No facts database found")
+        
     st.write(f'''<div style="text-align: center;">
                     <h5 style="color: #1D5B79;
                                 font-size: 40px; 

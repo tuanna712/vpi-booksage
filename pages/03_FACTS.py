@@ -24,8 +24,8 @@ def main():
         if 'user_email' in st.session_state:
             st.write(f"User: {st.session_state.user_email}")
             USER = st.session_state.user_email.split('@')[0]
-            FACTS_JSON = f'database/{USER}/facts_db/txt_db/qadb.json'
-            FACTS_DB = f'database/{USER}/facts_db/facts_vector_db'
+            FACTS_JSON = os.getcwd() + '/' + f'database/{USER}/facts_db/txt_db/qadb.json'
+            FACTS_DB = os.getcwd() + '/' + f'database/{USER}/facts_db/facts_vector_db'
         else:
             st.warning("Please login first")
             st.stop()
