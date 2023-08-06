@@ -9,8 +9,8 @@ from langchain.schema import Document
 from langchain.vectorstores import Qdrant
 from langchain.embeddings import CohereEmbeddings
 # import chromadb
-# from chromadb.utils import embedding_functions
 # from langchain.vectorstores import Chroma
+# from chromadb.utils import embedding_functions
 # from langchain.embeddings import CohereEmbeddings
 
 # Display single Fact----------------------------------------------------------
@@ -100,6 +100,7 @@ def edit_fact_db(df, FACTS_JSON):
         check_df = len(df)
     except TypeError:
         st.info("No facts database found")
+        st.stop()
         
     st.write(f'''<div style="text-align: center;">
                     <h5 style="color: #1D5B79;
