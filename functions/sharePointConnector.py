@@ -1,5 +1,6 @@
 #import necessary libraries
 import os
+import streamlit as st
 from office365.sharepoint.client_context import ClientContext
 from office365.runtime.auth.client_credential import ClientCredential
 from dotenv import load_dotenv
@@ -7,7 +8,7 @@ load_dotenv()
 
 class DatabaseLink():
     def  __init__(self, username):
-        self.username = username
+        self.username = username.split('@')[0]
         self.site_url = os.environ['SHAREPOINT_SITE']
         self.client_id= os.environ['SHAREPOINT_CLIENT_ID']
         self.client_secret = os.environ['SHAREPOINT_CLIENT_SECRET']
