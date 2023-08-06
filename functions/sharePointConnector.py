@@ -14,8 +14,9 @@ class DatabaseLink():
         self.ctx = ClientContext(self.site_url).with_credentials(ClientCredential(self.client_id, self.client_secret))
         self.parent_url = os.environ['SHAREPOINT_PARENT_URL']
         self.user_url = self.parent_url + self.username
-        self.local_path = os.environ['LOCAL_DATABASE_PATH'] + self.username
-    
+        self.local_path = os.getcwd() + '/' + os.environ['LOCAL_DATABASE_PATH'] + self.username
+        os.makedirs(os.path.dirname(self.local_path), exist_ok=True)
+
     def check_folder_existed(self, folder_url):
         child_folder = os.path.basename(folder_url)
         parent_folder = os.path.dirname(folder_url)
@@ -50,7 +51,7 @@ class DatabaseLink():
         
     def check_and_create_folder(self, folder_path):
         if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+            os.makedirs(folder_path, exist_ok=True)
             print(f"Folder '{folder_path}' created successfully.")
         else:
             print(f"Folder '{folder_path}' already exists.")
