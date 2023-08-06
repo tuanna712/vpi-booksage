@@ -26,6 +26,8 @@ def main():
             USER = st.session_state.user_email.split('@')[0]
             FACTS_JSON = os.getcwd() + '/' + f'database/{USER}/facts_db/txt_db/qadb.json'
             FACTS_DB = os.getcwd() + '/' + f'database/{USER}/facts_db/facts_vector_db'
+            os.makedirs(os.path.dirname(FACTS_JSON), exist_ok=True)
+            os.makedirs(os.path.dirname(FACTS_DB), exist_ok=True)
         else:
             st.warning("Please login first")
             st.stop()
