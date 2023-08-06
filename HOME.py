@@ -37,9 +37,10 @@ CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
 CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 REDIRECT_URI = os.environ['REDIRECT_URI']
 # --- LOGIN ---------------------------------------------------------------------
-st.text_input(label='Enter your email:',
-              value='vpi_user_name@vpi.pvn.vn',
-              key='user_email')
+user_name = st.text_input(label='Enter your email:',
+            value='vpi_user_name@vpi.pvn.vn',
+            key='defined_email')
+st.session_state.user_email = user_name
 # --- LOGIN ---------------------------------------------------------------------
 # from httpx_oauth.oauth2 import GetAccessTokenError
 # if 'user_email' not in st.session_state:
@@ -87,24 +88,25 @@ st.text_input(label='Enter your email:',
 # st.write("Recevied login token:", login_token)
 
 # --- SYNCHRONIZE ---------------------------------------------------------------------
-userSync = DatabaseLink(st.session_state.user_email)
-st.write(f"User: {userSync.username}")
-_home_columns = st.columns(2)
-with _home_columns[0]:
-    upload = st.button("Sync Upload", key="sync_upload")
-with _home_columns[1]:
-    download = st.button("Sync Download", key="sync_download")
+if 'user_email' in st.session_state:
+    userSync = DatabaseLink(st.session_state.user_email)
+    st.write(f"User: {userSync.username}")
+    _home_columns = st.columns(2)
+    with _home_columns[0]:
+        upload = st.button("Sync Upload", key="sync_upload")
+    with _home_columns[1]:
+        download = st.button("Sync Download", key="sync_download")
 
-if upload:
-    with st.spinner('Uploading...'):
-        userSync.upload_overwrite()
-    st.success("Upload successfully")
-    
-if download:
-    with st.spinner('Downloading...'):
-        userSync.download_overwrite()
-    st.success("Download successfully")
-    
-    
+    if upload:
+        with st.spinner('Uploading...'):
+            userSync.upload_overwrite()
+        st.success("Upload successfully")
+        
+    if download:
+        with st.spinner('Downloading...'):
+            userSync.download_overwrite()
+        st.success("Download successfully")
+        
+        
 
 

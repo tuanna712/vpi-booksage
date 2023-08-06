@@ -20,6 +20,11 @@ with open("./style/style.css") as f:
 def main():
     # Display sidebar information
     with st.sidebar:
+        if 'user_email' not in st.session_state:
+            user_name = st.text_input(label='Enter your email:',
+                                        value='vpi_user_name@vpi.pvn.vn',
+                                        key='defined_email_2')
+            st.session_state.user_email = user_name
         # Check if user is logged in---------------------------
         if 'user_email' in st.session_state:
             st.write(f"User: {st.session_state.user_email}")
