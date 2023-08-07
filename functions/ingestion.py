@@ -118,10 +118,7 @@ class DocProcessing():
             
     def tiktoken_len(self, text):
         tokenizer = tiktoken.get_encoding('cl100k_base')
-        tokens = tokenizer.encode(
-            text,
-            disallowed_special=()
-        )
+        tokens = tokenizer.encode(text, disallowed_special=())
         return len(tokens)
     
     def token_counts_plot(self, token_counts):

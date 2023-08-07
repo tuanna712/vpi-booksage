@@ -38,7 +38,7 @@ CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
 REDIRECT_URI = os.environ['REDIRECT_URI']
 # --- LOGIN ---------------------------------------------------------------------
 user_name = st.text_input(label='Enter your email:',
-            value='vpi_user_name@vpi.pvn.vn',
+            # value='vpi_user_name@vpi.pvn.vn',
             key='defined_email')
 st.session_state.user_email = user_name
 # --- LOGIN ---------------------------------------------------------------------

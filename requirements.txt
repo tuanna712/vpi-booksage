@@ -22,5 +22,6 @@ anthropic==0.3.4
 Office365-REST-Python-Client==2.3.16
 msal-streamlit-authentication==1.0.9
 httpx-oauth
+openpyxl==3.1.2
 pysqlite3
 pysqlite3-binary

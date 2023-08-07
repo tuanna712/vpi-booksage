@@ -165,5 +165,6 @@ database/
 
 ui_chatmessage.py
 qdrant_ans_gen.ipynb
+demo_authenticator.py
 
 backup/
