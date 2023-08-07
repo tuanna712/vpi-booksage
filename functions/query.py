@@ -40,7 +40,6 @@ class BookQA:
         self.fact_json = os.getcwd() + '/' + f'database/{user}/facts_db/txt_db/qadb.json'
         self.collection_name = collection_name
         self.vmethod = vmethod
-        # self.query = query
         self.llm = llm
         self.book_lang = book_lang
         self.top_k_searching = top_k_searching
@@ -64,7 +63,7 @@ class BookQA:
         
         self.matched_ans, self.matching_score = self.facts_matching()
 
-        if self.matching_score < 5: 
+        if self.matching_score > 0.95: 
             llm_answer, response_time, refers = self.matched_ans, 0, ['faq', 'FAQ']    
         else:
             self.prompting()
@@ -136,35 +135,22 @@ class BookQA:
         return self.search_results
     #FACTS MATCHING-------------------------------------------------------------------
     def facts_matching(self):
-        import pandas as pd
-        if os.path.isfile(self.fact_json):
-            df = pd.read_json(self.fact_json)
-        else:
-            st.warning("No facts database found")
-        client = chromadb.PersistentClient(path=self.fact_path)
-        cohere_ef  = embedding_functions.CohereEmbeddingFunction(
-                                    api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
-                                    model_name="multilingual-22-12")
-        # Action for embedding facts
-        try:
-            collection_name = client.list_collections()[0].name
-            query_collection = client.get_collection(name = collection_name, 
-                                                embedding_function = cohere_ef)
-        except ValueError:
-            st.warning("There is no collection in the database. Please ingest the collection first!")
+        collection_name = st.session_state.user + '_factsdb'
+        import cohere
+        cohere_client = cohere.Client(api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
+        results = self.qdrant_client.search(collection_name=collection_name,
+                    query_vector=cohere_client.embed(texts=[self.query],
+                                                    model='multilingual-22-12',
+                                                    ).embeddings[0],
+                    limit=3
+                    )
         
-        results = query_collection.query(
-            query_texts=[self.query],
-            n_results=3,
-        )  
-        matching_score = round(results['distances'][0][0], 2)   
-        if matching_score < 40:
-            matched_question = results['documents'][0][0]
-            row_index = df.index[df['question'] == matched_question].tolist()[0]
-            matched_ans = df.loc[row_index, 'answer']
-        else:
-            matched_ans = ''
+        #Return
+        matched_ans = results[0].payload['metadata']['answer']
+        matching_score = results[0].score
+        
         return matched_ans, matching_score
+    
     #PROMPTING-------------------------------------------------------------------
     def prompting(self):
         _search_info = " --- " + " --- ".join([self.search_results[i][0].page_content 
