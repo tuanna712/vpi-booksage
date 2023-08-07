@@ -21,6 +21,7 @@ def ingestion_params(FACTS_VDB):
                                         collection_name=st.session_state.collection_name,
                                         book_lang=_book_lang,
                                         vector_path=FACTS_VDB,
+                                        vmethod='qdrant',
                                         )
             PrivateDoc.file_processing()
             st.session_state.private_doc = PrivateDoc
@@ -58,11 +59,12 @@ def file_uploader():
     with sub_cols[3]:
         st.number_input(label='Chunk Overlap', min_value=0, value=100, key='chunk_overlap')
     with sub_cols[4]:
-        st.text_input(label='Collection Name', key='collection_name')
+        st.text_input(label='Collection Name',value='new_collection', key='collection')
+        st.session_state.collection_name = (st.session_state.user_email).split('@')[0] + '_docs_' + st.session_state.collection
     return uploaded_file
     
 def ui_sidebar_ingestion():
     with st.sidebar:
         if 'user_email' in st.session_state:
-            st.write(f"User: {st.session_state.user_email}")
+            st.write(f"User: {st.session_state.user_email.split('@')[0]}")
     pass

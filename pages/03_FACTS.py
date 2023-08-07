@@ -1,5 +1,3 @@
-import json
-import pandas as pd
 import streamlit as st
 from functions.facts_qdrant import *
 from PIL import Image

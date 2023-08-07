@@ -1,8 +1,6 @@
 import streamlit as st
-from functions import *
-from ui.ui_booksage import *
 from ui.ui_ingestion import *
-from ui.ui_ingest_collection import *
+from ui.ui_qdrant_collection import *
 
 from PIL import Image
 
@@ -30,7 +28,7 @@ _tab_create, _tab_review, _tab_remove = st.tabs(['Create Collection',
 # Check if user is logged in------------------------
 if 'user_email' in st.session_state:
     USER = st.session_state.user_email.split('@')[0]
-    FACTS_VDB = f'database/{USER}/docs_db'
+    FACTS_VDB = os.getcwd() + '/' + f'database/{USER}/docs_db'
 else:
     st.warning("Please login first")
     st.stop()

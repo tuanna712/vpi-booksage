@@ -2,16 +2,15 @@ import os
 import pandas as pd
 import streamlit as st
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import cohere
 from qdrant_client import QdrantClient
 
 from langchain.schema import Document
 from langchain.vectorstores import Qdrant
 from langchain.embeddings import CohereEmbeddings
-# import chromadb
-# from langchain.vectorstores import Chroma
-# from chromadb.utils import embedding_functions
-# from langchain.embeddings import CohereEmbeddings
 
 # Display single Fact----------------------------------------------------------
 def display_single_fact(df):
@@ -188,9 +187,9 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
     # Create facts vector db
     # Define Qdrant endpoint and Cohere Embedding
     embeddings = CohereEmbeddings(model="multilingual-22-12", 
-                                cohere_api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
-    qdrant_url = "https://05044933-e753-430c-9081-c78b1017476e.eu-central-1-0.aws.cloud.qdrant.io:6333"
-    qdrant_api_key = "yLaJqjcyqel5R_mxJrD8RGXSYxljl52MRTC8t-eFzpEyiOdcspLqgA"
+                                cohere_api_key=os.environ['COHERE_API_KEY'])
+    qdrant_url = os.environ['QDRANT_URL']
+    qdrant_api_key = os.environ['QDRANT_API_KEY']
     client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
     if 'user_email' in st.session_state:
         collection_name = st.session_state.user_email.split('@')[0] + '_factsdb'
@@ -230,7 +229,7 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
     # Action for embedding facts
     if st.session_state.search_facts:
         with st.spinner('Searching...'):
-            cohere_client = cohere.Client(api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
+            cohere_client = cohere.Client(api_key=os.environ['COHERE_API_KEY'])
             results = client.search(collection_name=collection_name,
                 query_vector=cohere_client.embed(texts=[st.session_state.input_question],
                                                 model='multilingual-22-12',

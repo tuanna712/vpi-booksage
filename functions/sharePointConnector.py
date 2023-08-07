@@ -67,7 +67,7 @@ class DatabaseLink():
                 file = self.ctx.web.get_file_by_server_relative_url(f_url)
                 file.download(f)
                 self.ctx.execute_query()
-            print('Downloaded file: ', os.path.basename(local_path))
+            st.info('Downloaded file: ', os.path.basename(local_path))
         pass
     
     def local_folders_list(self):
@@ -118,7 +118,7 @@ class DatabaseLink():
             _target_folder = self.ctx.web.get_folder_by_server_relative_url(_target_site)
             with open(_path, 'rb') as f:
                 _target_folder.files.upload(file_name=os.path.basename(_path), content=f).execute_query()
-            print(f'File {os.path.basename(_path)} uploaded')
+            st.info(f'File {os.path.basename(_path)} uploaded')
     
     def get_objects(self, root_url):
         #Get Folder from server

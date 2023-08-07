@@ -5,7 +5,8 @@ import streamlit as st
 from chromadb.utils import embedding_functions
 from langchain.vectorstores import Chroma
 from langchain.embeddings import CohereEmbeddings
-
+from dotenv import load_dotenv
+load_dotenv()
 # Display single Fact----------------------------------------------------------
 def display_single_fact(df):
     try:
@@ -177,7 +178,7 @@ def facts_to_vectordb(FACTS_DB, FACTS_JSON):
     # Create facts vector db
     client = chromadb.PersistentClient(path=facts_vdb_path)
     cohere_ef  = embedding_functions.CohereEmbeddingFunction(
-                                    api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
+                                    api_key=os.environ['COHERE_API_KEY'], 
                                     model_name="multilingual-22-12")
     # Action for embedding facts
     if st.session_state.create_facts_db and question_list is not None:
