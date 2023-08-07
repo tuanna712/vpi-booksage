@@ -28,7 +28,7 @@ def collection_management(FACTS_VDB):
     read_single_collection(client, collection_name)
 
 # Define GLOBALS ---------------------------------------------------------------
-def define_globals(FACTS_VDB):
+def define_globals(FACTS_VDB=None):
     embeddings = CohereEmbeddings(model="multilingual-22-12", 
                                 cohere_api_key=os.environ['COHERE_API_KEY'])
     qdrant_url = os.environ['QDRANT_URL']
@@ -39,7 +39,12 @@ def define_globals(FACTS_VDB):
     
 # Call Collection ---------------------------------------------------------------
 def read_single_collection(client, collection_name):
-    n_points = client.count(collection_name=collection_name).count
+    try:
+        n_points = client.count(collection_name=collection_name).count
+    except:
+        st.info('No available documents on-cloud')
+        st.stop()
+        pass
     if n_points > 0:
         # Docs selection
         doc_id = st.number_input(label='Document ID:', 
@@ -50,8 +55,11 @@ def read_single_collection(client, collection_name):
         st.warning(point[0].payload['page_content'].replace('_', ' '))
         # Display metadata of document
         metadata = point[0].payload['metadata']
-        if len(metadata) > 0:
-            st.info(f'Docs information:\n {metadata}')
+        try:
+            if len(metadata) > 0:
+                st.info(f'Docs information:\n {metadata}')
+        except TypeError:
+            pass
     else:
         st.info('No available documents')
     pass

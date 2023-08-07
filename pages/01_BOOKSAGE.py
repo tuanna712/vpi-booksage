@@ -16,7 +16,7 @@ st.set_page_config(# Alternate names: setup_page, page, layout
 with open("./style/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# --- BookSage SideBar ------------------------------------------------------------
+# --- BookSage SideBar -------------------------------------------------------
 ui_booksage_sidebar()
     
 # --- UI Booksage ------------------------------------------------------------

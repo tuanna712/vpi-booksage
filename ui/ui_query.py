@@ -43,7 +43,7 @@ def ui_chat_messages(collection_name, book_lang, llm, top_k):
             full_response = ""
             # LLM here
             BookQnA = BookQA(llm=llm,
-                        vector_path=st.session_state.FACTS_VDB,
+                        # vector_path=st.session_state.FACTS_VDB,
                         user=st.session_state.user,
                         book_lang=book_lang,
                         collection_name=collection_name,

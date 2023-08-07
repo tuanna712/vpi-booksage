@@ -1,9 +1,5 @@
-import chromadb
-import pandas as pd
 import streamlit as st
-from chromadb.utils import embedding_functions
 from .ui_qdrant_collection import *
-import time
 
 def ui_booksage_sidebar():
     with st.sidebar:
@@ -16,11 +12,12 @@ def ui_booksage_sidebar():
             st.warning("Please login first")
             st.stop()
         # Define basic params
-        FACTS_VDB = f'database/{USER}/docs_db'
-        st.session_state.FACTS_VDB = FACTS_VDB
-        CLIENT, COHERE_EF = define_globals(FACTS_VDB)
+        client, embeddings = define_globals()
         # Read and call saved collections
-        collections_list, collection_namelist = collection_loader(CLIENT)
+        collection_namelist = [collection.name 
+                                            for collection in client.get_collections().collections 
+                                            if collection.name.startswith(USER)
+                                            ]
         collection_name = st.selectbox(label='Select Collection:', 
                                     options=collection_namelist, 
                                     key='bs_collection_dropdown')

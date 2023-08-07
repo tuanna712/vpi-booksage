@@ -4,8 +4,8 @@ import streamlit as st
 from datetime import datetime
 from dotenv import load_dotenv
 
-import chromadb
-from chromadb.utils import embedding_functions
+# import chromadb
+# from chromadb.utils import embedding_functions
 
 from underthesea import word_tokenize
 from qdrant_client import QdrantClient
@@ -17,8 +17,8 @@ from google.cloud import translate
 from vertexai.preview.language_models import TextGenerationModel
 
 from langchain.vectorstores import Qdrant
-from langchain.vectorstores import Chroma
 from langchain.embeddings import CohereEmbeddings
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -30,14 +30,14 @@ class BookQA:
                  collection_name:str=None,
                  query:str=None, #Put some questions / queries here
                  llm:str='chatgpt', #Or 'palm2' # or 'claude'
-                 vmethod:str='chroma',
+                 vmethod:str='qdrant',
                  book_lang:str='en',
                  top_k_searching:int=5,
                  ):
         
         self.vector_path = vector_path
         self.fact_path = f'database/{user}/facts_db/facts_vector_db'
-        self.fact_json = f'database/{user}/facts_db/txt_db/qadb.json'
+        self.fact_json = os.getcwd() + '/' + f'database/{user}/facts_db/txt_db/qadb.json'
         self.collection_name = collection_name
         self.vmethod = vmethod
         # self.query = query
@@ -49,9 +49,12 @@ class BookQA:
         
         self.qdrant_url = os.environ['QDRANT_URL']
         self.qdrant_api_key = os.environ['QDRANT_API_KEY']
+        self.qdrant_client = QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
+        
         openai.api_key = os.environ['OPENAI_API_KEY']
         
-        self.embeddings = CohereEmbeddings(model="multilingual-22-12", cohere_api_key=os.environ['COHERE_API_KEY'])
+        self.embeddings = CohereEmbeddings(model="multilingual-22-12", 
+                                           cohere_api_key=os.environ['COHERE_API_KEY'])
         
         self.database_loading()
     
@@ -69,7 +72,7 @@ class BookQA:
                 # print('Google Responding...\n')
                 try:
                     llm_answer, response_time = self.responding_google()
-                except InvalidArgument:
+                except:
                     pass
             elif self.llm == 'openai':
                 # print('OpenAI Responding...\n')
@@ -85,39 +88,29 @@ class BookQA:
     #DATABASE-LOADING------------------------------------------------------------
     def database_loading(self):
         if self.vmethod == 'qdrant':
-            self.vectordb_loading()
+            self.qdrant_loading()
         elif self.vmethod == 'chroma':
             self.chroma_loading()
         else:
             print("Please select vectordatabase method: 'qdrant' or 'chroma'")
             
-    def vectordb_loading(self):
-        if "vdatabase" in globals() or "qdrant" in locals():
-            del self.vdatabase
-        if os.path.exists(self.vector_path):
-            [os.remove(os.path.join(root, filename)) for root, dirs, files in os.walk(self.vector_path) \
-                                                    for filename in files if filename.endswith(".lock")]
-
-        client = QdrantClient(path=self.vector_path, prefer_grpc=True)
-        self.vdatabase = Qdrant(client=client, collection_name=self.collection_name, embeddings=self.embeddings)
-        # print("Qdrant Database loaded from local storage\n")
+    def qdrant_loading(self):
+        self.vdatabase = Qdrant(client=self.qdrant_client, 
+                                collection_name=self.collection_name, 
+                                embeddings=self.embeddings)
+        pass
         
     def chroma_loading(self):
-        import chromadb
-        from chromadb.utils import embedding_functions
-        CLIENT = chromadb.PersistentClient(path=self.vector_path)
-        # COHERE_EF = embedding_functions.CohereEmbeddingFunction(
-        #                                 api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz", 
-        #                                 model_name="multilingual-22-12")
-        # collection_chroma = CLIENT.get_collection(name = self.collection_name, 
-        #                                         embedding_function = COHERE_EF)
-        
-        self.vdatabase= Chroma(
-                            client=CLIENT,
-                            persist_directory=self.vector_path,
-                            collection_name=self.collection_name,
-                            embedding_function=self.embeddings,
-                        )
+        # import chromadb
+        # from chromadb.utils import embedding_functions
+        # CLIENT = chromadb.PersistentClient(path=self.vector_path)
+        # self.vdatabase= Chroma(
+        #                     client=CLIENT,
+        #                     persist_directory=self.vector_path,
+        #                     collection_name=self.collection_name,
+        #                     embedding_function=self.embeddings,
+        #                 )
+        pass
     #DATABASE-SEARCHING----------------------------------------------------------
     def searching(self):
         if self.book_lang == 'vi':
