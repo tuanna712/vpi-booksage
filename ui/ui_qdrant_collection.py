@@ -17,7 +17,7 @@ def collection_management(FACTS_VDB):
     # Read and call saved collections by username
     st.session_state.collection_namelist = [collection.name 
                                             for collection in client.get_collections().collections 
-                                            if collection.name.startswith({st.session_state.user_email.split('@')[0]})
+                                            if collection.name.startswith(st.session_state.user_email.split('@')[0])
                                             ]
 
     collection_name = st.selectbox('Select Collection:', 

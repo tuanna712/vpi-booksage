@@ -157,11 +157,13 @@ class DocProcessing():
         client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         client.delete_collection(collection_name=self.collection_name)
         with st.spinner(text='Embedding...'):
+            ids = [i for i in range(len(self.chunks))]
             ##Process-PDF-------------------------------
             if self.file_extension in [".pdf"]:
                 ###Online-Mode--------------------------
                 self.vdatabase = Qdrant.from_documents(self.chunks,
                                                 self.embeddings, 
+                                                ids = ids,
                                                 url=self.qdrant_url, 
                                                 prefer_grpc=True, 
                                                 api_key=self.qdrant_api_key, 
@@ -172,6 +174,7 @@ class DocProcessing():
                 ###Online-Mode--------------------------
                 self.vdatabase = Qdrant.from_texts(self.chunks,
                                                 self.embeddings, 
+                                                ids = ids,
                                                 url=self.qdrant_url, 
                                                 prefer_grpc=True, 
                                                 api_key=self.qdrant_api_key, 
