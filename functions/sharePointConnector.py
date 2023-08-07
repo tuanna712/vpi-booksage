@@ -67,7 +67,7 @@ class DatabaseLink():
                 file = self.ctx.web.get_file_by_server_relative_url(f_url)
                 file.download(f)
                 self.ctx.execute_query()
-            st.info('Downloaded file: ', os.path.basename(local_path))
+            # st.info('Downloaded file: ', os.path.basename(local_path))
         pass
     
     def local_folders_list(self):

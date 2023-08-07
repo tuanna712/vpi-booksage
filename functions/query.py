@@ -166,7 +166,7 @@ class BookQA:
         self.prompt = f"""
         You will be provided with the question which is delimited by XML tags and the \
         context delimited by triple backticks. 
-        The context contains 5 long paragraphs and 1 reference which delimited by triple dash. \
+        The context contains some long paragraphs and 1 reference which delimited by triple dash. \
         <tag>{self.query}</tag>
         ````\n{_search_info}```\n{self.matched_ans}\n```
         """
