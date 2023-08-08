@@ -35,7 +35,7 @@ def qdrant_faq_uploader(FACTS_DB, lang):
             #Qdrant Key
             self.qdrant_url = qdrant_url
             self.qdrant_api_key = qdrant_api_key
-            self.file_path = file_path        
+            self.file_path = file_path
 
             #Embedding using Cohere Multilingual
             self.embeddings = CohereEmbeddings(model="multilingual-22-12", 
@@ -46,23 +46,25 @@ def qdrant_faq_uploader(FACTS_DB, lang):
             df = pd.read_excel(self.file_path)
             #Remove all null answer
             self.df = df.dropna(subset=['Trả lời'])
+            self.question_list = self.df['Câu hỏi'].tolist()
+            self.ans_list = self.df['Trả lời'].tolist()
 
         def langchain_docs(self):
             #Create Langchain Document including Question-Answer
-            self.question_list = []
+            self.question_list_2 = self.question_list
+            self.fn_question_list = []
             self.vi_processed_question_list = []
             self.ids = []
-            for i in range(len(self.df)):
+            for i in range(len(self.question_list)):
                 self.ids.append(i)
-                single_question = Document(page_content=self.df.iloc[i,0], 
-                                        metadata={'answer': self.df.iloc[i,1], 
+                single_question = Document(page_content=self.question_list[i],
+                                        metadata={'answer': self.ans_list[i], 
                                                     'n_question': i})
-                self.question_list.append(single_question)
-
+                self.fn_question_list.append(single_question)
                 # Preprocessing with Underthesea
-                self.df.iloc[i,0] = word_tokenize(self.df.iloc[i,0], format="text")
-                vi_single_question = Document(page_content=self.df.iloc[i,0], 
-                                        metadata={'answer': self.df.iloc[i,1], 
+                self.question_list_2[i] = word_tokenize(self.question_list[i], format="text")
+                vi_single_question = Document(page_content=self.question_list_2[i],
+                                        metadata={'answer': self.ans_list[i], 
                                                     'n_question': i})
                 self.vi_processed_question_list.append(vi_single_question)
 
@@ -70,6 +72,7 @@ def qdrant_faq_uploader(FACTS_DB, lang):
             #Upload Documents to Qdrant Online Storage
             Qdrant.from_documents(docs,
                                 self.embeddings, 
+                                ids = self.ids,
                                 url=self.qdrant_url, 
                                 api_key=self.qdrant_api_key, 
                                 content_payload_key="page_content",
@@ -80,16 +83,15 @@ def qdrant_faq_uploader(FACTS_DB, lang):
         def processing(self):
             self.read_file()
             self.langchain_docs()
-            self.upload_qdrant(self.question_list, 'faq')
+            self.upload_qdrant(self.fn_question_list, 'faq')
             if lang == 'vi':
                 self.upload_qdrant(self.vi_processed_question_list, 'faqVieProcessed')
             print('Uploaded Documents to Qdrant in 2 Collection faq and faqVieProcessed')
-    #Finished
+    
     FAQdrant(st.session_state.qdrant_url, 
              st.session_state.qdrant_api_key, 
              file_path=f'{FACTS_DB}/multiple_questions_gen.xlsx',
              ).processing()
-    pass
 
 def qdrant_context_uploader(context, lang):
     class DocsQdrant():
@@ -113,25 +115,27 @@ def qdrant_context_uploader(context, lang):
 
         def langchain_docs(self):
             #Create Langchain Document including Question-Answer
-            self.context_list = []
+            self.context_docs = []
             self.vi_processed_context_list = []
             self.ids = []
             for i in range(len(self.context_list)):
                 self.ids.append(i)
                 single_context = Document(page_content=self.context_list[i], 
                                         metadata={'n_context': i})
-                self.context_list.append(single_context)
-
+                self.context_docs.append(single_context)
+                
                 # Preprocessing with Underthesea
-                self.context_list[i] = word_tokenize(self.context_list[i], format="text")
-                vi_single_context = Document(page_content=self.context_list[i], 
+                self.vi_context_list = self.context_list
+                self.vi_context_list[i] = word_tokenize(self.vi_context_list[i], format="text")
+                vi_single_context = Document(page_content=self.vi_context_list[i], 
                                         metadata={'n_context': i})
                 self.vi_processed_context_list.append(vi_single_context)
-
+            
         def upload_qdrant(self, docs, collection_name):
             #Upload Documents to Qdrant Online Storage
             Qdrant.from_documents(docs,
                                 self.embeddings, 
+                                ids = self.ids,
                                 url=self.qdrant_url, 
                                 api_key=self.qdrant_api_key, 
                                 content_payload_key="page_content",
@@ -145,11 +149,11 @@ def qdrant_context_uploader(context, lang):
             else:
                 self.read_file()
             self.langchain_docs()
-            self.upload_qdrant(self.context_list, 'context')
+            self.upload_qdrant(self.context_docs, 'context')
             if self.lang == 'vi':
-                self.upload_qdrant(self.vi_processed_question_list, 'contextVieProcessed')
+                self.upload_qdrant(self.vi_processed_context_list, 'contextVieProcessed')
             print('Uploaded Documents to Qdrant in 2 Collection context and contextVieProcessed')
-    #Finished
+
     DocsQdrant(st.session_state.qdrant_url, 
              st.session_state.qdrant_api_key, 
              context=context,

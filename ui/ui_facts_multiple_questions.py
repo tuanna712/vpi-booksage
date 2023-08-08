@@ -8,34 +8,73 @@ def ui_multiple_questions(FACTS_DB):
     # Display title
     ui_title()
     # Define Sub-tabs
-    subtab1, subtab2, subtab3 = st.tabs(['File Uploader and Review', 'QnA Generator', 'Qdrant Uploader'])
+    subtab1, subtab2, subtab3, subtab4= st.tabs(['File Uploader', 'QnA Generator', 'Review', 'Qdrant Uploader'])
     
     # Upload context and questions
-    with subtab1:
+    with subtab1: # File Uploader and Review
         cols = st.columns(2)
         with cols[0]:
             raw_text = ui_context_uploader()
         with cols[1]:
             questions = ui_question_uploader()
-    with subtab2:
-        if st.button('Start'):
-            multiple_questions_generator(questions, raw_text, FACTS_DB) 
+    if raw_text is not None and questions is not None:
+        with subtab2: # QnA Generator
+            subtab2_cols = st.columns(2)
+            if questions is not None:
+                with subtab2_cols[0]:
+                # Select Question Column from Question Dataframe
+                    question_col = st.selectbox('Select Question Column:', questions.columns, key='question_col')
+                with subtab2_cols[1]:
+                    ans_col = st.selectbox('Select Column for writing new Answer:', questions.columns, key='ans_col')
+                    
+            # Select range of questions
+            q_range = st.form(key='range_form')
+            with q_range:
+                if questions is not None:
+                    q_start, q_end = st.slider('Select range of questions:', 0, len(questions), (0, len(questions)))
+                else:
+                    q_start, q_end = 0, 0
+                st.text_input(label='Set name of answered Excel output File', key='file_version')
+                q_range_btn = q_range.form_submit_button(label='Start generating QnA')
             
-    with subtab3:
-        # Define QDRANT ID, KEY
-        qdrant_id()
-        if st.session_state.lang == 'Vietnamese':
-            lang = 'vi'
-        else:
-            lang = 'en'
-        if st.session_state.qdrant_url is not None and st.session_state.qdrant_api_key is not None:
-            if st.button('Upload to QDRANT'):
-                with st.spinner(text='Uploading...'):
-                    qdrant_faq_uploader(FACTS_DB, lang)
-                    qdrant_context_uploader(raw_text, lang)
-            st.success('Uploaded to QDRANT!')
-        else:
-            st.warning('QDRANT ID and API KEY should not be empty!!!')
+            # Start generating QnA
+            if q_range_btn:
+                try:
+                    multiple_questions_generator(questions, raw_text, FACTS_DB, question_col, ans_col, q_start, q_end)
+                except UnboundLocalError:
+                    st.warning('Please upload context, questions, choose proper columns and set range of questions first!')
+                    st.stop()
+        with subtab3: # Review
+            # Scan and select all path of .xlsx files in FACTS_DB
+            files = []
+            for r, d, f in os.walk(FACTS_DB):
+                for file in f:
+                    if '.xlsx' in file:
+                        files.append(file)
+            # Select file to review
+            if len(files) > 0:
+                file_to_review = st.selectbox('Select file to review:', files, key='file_to_review')
+                # Read file
+                read_df = pd.read_excel(os.path.join(FACTS_DB, file_to_review))
+                # Print dataframe
+                st.dataframe(read_df, height=600)
+            pass
+                    
+        with subtab4: # Qdrant Uploader
+            # Define QDRANT ID, KEY
+            qdrant_id()
+            if st.session_state.lang == 'Vietnamese':
+                lang = 'vi'
+            else:
+                lang = 'en'
+            if len(st.session_state.qdrant_url)>0 and len(st.session_state.qdrant_api_key)>0:
+                if st.button('Upload to QDRANT'):
+                    with st.spinner(text='Uploading...'):
+                        qdrant_faq_uploader(FACTS_DB, lang)
+                        # qdrant_context_uploader(raw_text, lang)
+                    st.success('Uploaded to QDRANT!')
+            else:
+                st.warning('QDRANT ID and API KEY should not be empty!!!')
 def qdrant_id():
     _cols = st.columns(2)
     with _cols[0]:
@@ -83,17 +122,17 @@ def ui_question_uploader():
             st.dataframe(questions)
         return questions
     
-def multiple_questions_generator(question_df, context, FACTS_DB):
+def multiple_questions_generator(question_df, context, FACTS_DB, question_col, ans_col, q_start, q_end):
     with st.spinner(text='Generating QnA...'):
         with st.expander("Questions and Answers", expanded=False):
-            for i in range(len(question_df)):
-                question = question_df.loc[i,'Câu hỏi?']
-                question_df.loc[i,'Trả lời'] = responding_claude(question, context
+            for i in range(q_start, q_end):
+                question = question_df.loc[i, question_col]
+                question_df.loc[i,ans_col] = responding_claude(question, context
                                                                 ).replace('<tag>', ''
                                                                 ).replace('</tag>', '')
                 st.info(f"Question {i}: \
                         \n\nQ: {question}\
-                        \n\nA: {question_df.loc[i,'Trả lời']}\
+                        \n\nA: {question_df.loc[i,ans_col]}\
                         ")
                 question_df.to_excel(f'{FACTS_DB}/multiple_questions_gen.xlsx', index=False)
     st.success('Generated all QnAs!')

@@ -37,23 +37,26 @@ def main():
             st.stop()
             
         # --- TABS Definition ---------------------------------
-        fact_ui_options = st.radio('Facts UI', ['Generator', 'Review', 'Edit', 'Database', 'Multiple Questions'], 
+        fact_ui_options = st.radio('Facts UI', ['Single Question', 'Multiple Questions'], 
                                    key='fact_ui_options')
-    # --- UI Generator ----------------------------------------
-    if fact_ui_options == 'Generator':
-        ui_facts_gen(FACTS_JSON)
-    # --- UI Review -------------------------------------------
-    if fact_ui_options == 'Review':
-        read_df = read_fact_db(FACTS_JSON)
-        display_single_fact(read_df)
-    # --- UI Edit ---------------------------------------------
-    if fact_ui_options == 'Edit':
-        read_df = read_fact_db(FACTS_JSON)
-        edit_fact_db(read_df, FACTS_JSON)
-    # --- UI Database -----------------------------------------
-    if fact_ui_options == 'Database':
-        facts_to_vectordb(FACTS_DB, FACTS_JSON)
-    # --- UI Multiple Questions --------------------------------
+    # --- Single Question --------------------------------------
+    if fact_ui_options == 'Single Question':
+        subtab1, subtab2, subtab3, subtab4 = st.tabs(['Generator', 'Review', 'Edit', 'Database'])
+        # --- UI Generator -------------------------------------
+        with subtab1:
+            ui_facts_gen(FACTS_JSON)
+        # --- UI Review ----------------------------------------
+        with subtab2:
+            read_df = read_fact_db(FACTS_JSON)
+            display_single_fact(read_df)
+        # --- UI Edit ------------------------------------------
+        with subtab3:
+            read_df = read_fact_db(FACTS_JSON)
+            edit_fact_db(read_df, FACTS_JSON)
+        # --- UI Database --------------------------------------
+        with subtab4:
+            facts_to_vectordb(FACTS_DB, FACTS_JSON)
+    # --- Multiple Questions -----------------------------------
     if fact_ui_options == 'Multiple Questions':
         ui_multiple_questions(FACTS_DB)
 
