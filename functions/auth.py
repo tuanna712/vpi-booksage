@@ -55,10 +55,10 @@ def add_logo():
             [data-testid="stSidebarNav"] {
                 background-image: url(https://i.ibb.co/Jz8CNyh/LogoVPI.png);
                 background-repeat: no-repeat;
-                background-size: 230px 230px;
+                background-size: 180px 180px;
                 padding-top: 120px;
-                padding-left: 10px;
-                background-position: 20px 20x;
+                padding-left: 05px;
+                background-position: 0px 0px 20px 20x;
             }
             [data-testid="stSidebarNav"]::before {
                 content: "VPI-Sage";
