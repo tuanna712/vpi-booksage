@@ -53,7 +53,7 @@ def add_logo():
         """
         <style>
             [data-testid="stSidebarNav"] {
-                background-image: url(https://i.ibb.co/LPp2TTB/logo.png);
+                background-image: url(https://i.ibb.co/Jz8CNyh/LogoVPI.png);
                 background-repeat: no-repeat;
                 background-size: 230px 230px;
                 padding-top: 120px;
