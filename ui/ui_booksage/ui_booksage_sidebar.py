@@ -4,7 +4,7 @@ from .ui_qdrant_collection import *
 def ui_booksage_sidebar():
     with st.sidebar:
         if 'user_email' in st.session_state:
-            st.write(f"User email: {st.session_state.user_email}")
+            # st.write(f"User email: {st.session_state.user_email}")
             USER = st.session_state.user_email.split('@')[0]
             st.session_state.user = USER
             
@@ -33,4 +33,3 @@ def ui_booksage_sidebar():
         top_k = st.slider(label='Select Top k:',
                           min_value=1, max_value=10,
                           value=5, key='bs_top_k_selected')
-    

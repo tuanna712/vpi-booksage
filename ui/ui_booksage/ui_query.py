@@ -1,5 +1,6 @@
 import streamlit as st
 from functions.query import *
+
 def ui_booksage_chat():
     if 'bs_collection_dropdown' in st.session_state:
         collection_name = st.session_state.bs_collection_dropdown

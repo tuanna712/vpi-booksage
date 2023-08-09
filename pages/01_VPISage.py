@@ -1,7 +1,8 @@
-import streamlit as st
-from ui.ui_booksage import *
-from ui.ui_query import *
 from PIL import Image
+import streamlit as st
+from ui.ui_booksage.ui_booksage_sidebar import *
+from ui.ui_booksage.ui_query import *
+from ui.ui_sidebar import *
 
 # add_logo()
 
@@ -17,6 +18,8 @@ with open("./style/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # --- BookSage SideBar -------------------------------------------------------
+with st.sidebar:
+    login()
 ui_booksage_sidebar()
     
 # --- UI Booksage ------------------------------------------------------------

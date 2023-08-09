@@ -55,17 +55,22 @@ class BookQA:
         self.embeddings = CohereEmbeddings(model="multilingual-22-12", 
                                            cohere_api_key=os.environ['COHERE_API_KEY'])
         
-        self.database_loading()
-    
+        self.vdatabase = Qdrant(client=self.qdrant_client, 
+                                collection_name=self.collection_name, 
+                                embeddings=self.embeddings)
+        
     def bookQnA(self, question):
         self.query = question
         self.searching()
-        
-        self.matched_ans, self.matching_score = self.facts_matching()
+        try:
+            self.matched_ans, self.matching_score = self.facts_matching()
+        except:
+            st.warning('Could not found Facts Collection!')
 
         if self.matching_score > 0.95: 
-            llm_answer, response_time, refers = self.matched_ans, 0, ['faq', 'FAQ']    
+            llm_answer, response_time, refers = self.matched_ans, 0, ['faq', 'FAQ']
         else:
+            self.matched_ans = ''
             self.prompting()
             if self.llm == 'palm2':
                 # print('Google Responding...\n')
@@ -84,32 +89,6 @@ class BookQA:
 
         return llm_answer, response_time, refers
         
-    #DATABASE-LOADING------------------------------------------------------------
-    def database_loading(self):
-        if self.vmethod == 'qdrant':
-            self.qdrant_loading()
-        elif self.vmethod == 'chroma':
-            self.chroma_loading()
-        else:
-            print("Please select vectordatabase method: 'qdrant' or 'chroma'")
-            
-    def qdrant_loading(self):
-        self.vdatabase = Qdrant(client=self.qdrant_client, 
-                                collection_name=self.collection_name, 
-                                embeddings=self.embeddings)
-        pass
-        
-    def chroma_loading(self):
-        # import chromadb
-        # from chromadb.utils import embedding_functions
-        # CLIENT = chromadb.PersistentClient(path=self.vector_path)
-        # self.vdatabase= Chroma(
-        #                     client=CLIENT,
-        #                     persist_directory=self.vector_path,
-        #                     collection_name=self.collection_name,
-        #                     embedding_function=self.embeddings,
-        #                 )
-        pass
     #DATABASE-SEARCHING----------------------------------------------------------
     def searching(self):
         if self.book_lang == 'vi':
@@ -138,17 +117,18 @@ class BookQA:
         collection_name = st.session_state.user + '_factsdb'
         import cohere
         cohere_client = cohere.Client(api_key="4ECOTqDXJpIYhxMQhUZxY12PPSqvgtYFclJm4Gnz")
+        
         results = self.qdrant_client.search(collection_name=collection_name,
                     query_vector=cohere_client.embed(texts=[self.query],
                                                     model='multilingual-22-12',
                                                     ).embeddings[0],
-                    limit=3
+                    limit=1
                     )
         
         #Return
         matched_ans = results[0].payload['metadata']['answer']
         matching_score = results[0].score
-        
+
         return matched_ans, matching_score
     
     #PROMPTING-------------------------------------------------------------------
@@ -170,20 +150,9 @@ class BookQA:
         <tag>{self.query}</tag>
         ````\n{_search_info}```\n{self.matched_ans}\n```
         """
-        # Follow the below steps to find the answer for the question:
-        # If the long paragraph has a structure of a Menu page, lets ignore this paragraph.
-
-        # Step 1 - Separate the context into 5 single paragraphs delimited by triple dash. 
-        # Step 2 - Based on the topic of the question, let's sumaries each paragraph. 
-        # Step 3 - Base on 5 sumarizations, give the final answer for the question.
-        # Step 4 - Show only the final answer.
-
-        # Let's process Step 1, 2, 3 in silence, only push step 4 to response.
-
+        
         if self.book_lang=='vi':
             self.prompt = self.prompt.replace("_"," ")
-        
-        # print('Finished Prompting\n')
                     
     def tiktoken_len(self, text):
         import tiktoken

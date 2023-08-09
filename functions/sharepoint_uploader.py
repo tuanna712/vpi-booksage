@@ -15,18 +15,23 @@ class DatabaseLink():
         self.ctx = ClientContext(self.site_url).with_credentials(ClientCredential(self.client_id, self.client_secret))
         self.parent_url = os.environ['SHAREPOINT_PARENT_URL']
         self.user_url = self.parent_url + self.username
-        self.local_path = os.getcwd() + '/' + os.environ['LOCAL_DATABASE_PATH'] + self.username
+        self.local_path = os.getcwd() + '/data/' + self.username
         os.makedirs(os.path.dirname(self.local_path), exist_ok=True)
 
     def check_folder_existed(self, folder_url):
+        '''
+        Check if folder existed in Sharepoint.
+        If not, create new folder with the given name.
+        - folder_url: url of the folder to check
+        '''
         child_folder = os.path.basename(folder_url)
         parent_folder = os.path.dirname(folder_url)
         try:
             self.ctx.web.get_folder_by_server_relative_url(folder_url).get().execute_query()
-            print(f'Folder {folder_url} existed')
+            print(f'URL-Folder {folder_url} existed')
         except:
             self.ctx.web.get_folder_by_server_relative_url(parent_folder).folders.add(child_folder).execute_query()
-            print(f'Folder {folder_url} created')
+            print(f'URL-Folder {folder_url} created')
     
     def upload_overwrite(self):
         # Check if user folder existed in server then create if not
@@ -42,7 +47,7 @@ class DatabaseLink():
         self.sever_folders_list = []
         for _ in self.local_folders:
             self.sever_folders_list.append(_.replace(self.local_path, self.user_url))
-            
+            print(f'URL Sever Folder: {_}')
         # Check if folder existed in server then create if not
         for folder in self.sever_folders_list:
             self.check_folder_existed(folder)
@@ -53,9 +58,9 @@ class DatabaseLink():
     def check_and_create_folder(self, folder_path):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path, exist_ok=True)
-            print(f"Folder '{folder_path}' created successfully.")
+            print(f"Local Folder '{folder_path}' created successfully.")
         else:
-            print(f"Folder '{folder_path}' already exists.")
+            print(f"Local Folder '{folder_path}' already exists.")
             
     def download_overwrite(self):
         file_urls = self.sever_files_list()
@@ -71,11 +76,12 @@ class DatabaseLink():
         pass
     
     def local_folders_list(self):
+        print(f'\n1n\n{self.local_path}')
         self.local_folders = []
         for root, dirs, files in os.walk(self.local_path):
             for dir in dirs:
                 self.local_folders.append(os.path.join(root, dir))
-
+        
     def files_in_local_folder(self, folder_url):
         _files_list = []
         for root, dirs, files in os.walk(folder_url):
@@ -118,7 +124,7 @@ class DatabaseLink():
             _target_folder = self.ctx.web.get_folder_by_server_relative_url(_target_site)
             with open(_path, 'rb') as f:
                 _target_folder.files.upload(file_name=os.path.basename(_path), content=f).execute_query()
-            st.info(f'File {os.path.basename(_path)} uploaded')
+            st.info(f'File {os.path.basename(_path)} synchronized successfully.')
     
     def get_objects(self, root_url):
         #Get Folder from server
@@ -139,5 +145,3 @@ class DatabaseLink():
             file_urls.append(file.properties['ServerRelativeUrl'])
         
         return folder_urls, file_urls
-
-# DatabaseLink('tuanna712').download_overwrite()

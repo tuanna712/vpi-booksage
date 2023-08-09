@@ -1,119 +1,112 @@
+import docx2txt
+import tiktoken
 import streamlit as st
-from functions.facts_qdrant import *
+import pandas as pd
+from functions.facts_gen_multi import *
+from functions.sharepoint_uploader import *
+from functions.qdrant_faq import *
+from functions.qdrant_context import *
+from functions.data_uploader import *
 
-# --- UI 4 GEN ------------------------------------------------------------------------
-def ui_facts_gen(FACTS_JSON):
-    fact_form = st.form(key='fact_form')
-    editable_form = st.form(key='editable_form')
-    with fact_form:
-        # Check if facts input existed then assign to _value
-        if 'facts_input' in st.session_state:
-            _value = st.session_state.facts_input
-        else:
-            _value = ""
-        # Display facts input text area
-        facts_input = st.text_area('Facts Analysis:',value=_value, height=200, key="facts_input")
-        # Action button for Facts Analysis -> CALL QnA Generator
-        fact_form_btn = fact_form.form_submit_button(label='Generate QnA')
-    #  --- GENERATE QnA ---------------------------------------------------------------
-    if fact_form_btn:
-        with st.spinner(text='Generating QnA...'):
-            try:
-                # Take QnA Action
-                _question, _answer = qna_generator_openai(facts_input)
-            except ValueError:
-                st.write("Can't detect structure of LLM output . Please try again.")
-    # --- EDIT QnA --------------------------------------------------------------------
-    if '_question' in st.session_state:
-        with editable_form:
-            qna_display(st.session_state._question, st.session_state._answer)
-            editable_form_btn = editable_form.form_submit_button(label='Save')
+from ui.ui_facts_review.ui_facts_table_review import *
+from ui.ui_facts_review.ui_facts_question_review import *
+from ui.ui_qdrant_uploader.ui_qdrant_faq import *
+from ui.ui_qdrant_uploader.ui_qdrant_context import *
+from ui.ui_qdrant_uploader.ui_ingestion import *
+
+def ui_multiple_questions(FACTS_DB):
+    # Display title
+    ui_title()
+    # Define Sub-tabs
+    subtab1, subtab2, subtab3, subtab4= st.tabs(['File Uploader', 'QnA Generator', 'Review', 'Qdrant Uploader'])
+    
+    # Upload context and questions
+    # ------------------------------------------------------------------------------------
+    with subtab1: # File Uploader and Review
+        cols = st.columns(2)
+        with cols[0]:
+            raw_text = ui_context_uploader()
+        with cols[1]:
+            questions = ui_question_uploader()
+    if raw_text is not None and questions is not None:
+    # ------------------------------------------------------------------------------------
+        with subtab2: # QnA Generator
+            subtab2_cols = st.columns(2)
+            if questions is not None:
+                with subtab2_cols[0]:
+                # Select Question Column from Question Dataframe
+                    question_col = st.selectbox('Select Question Column:', questions.columns, key='question_col')
+                with subtab2_cols[1]:
+                    ans_col = st.selectbox('Select Column for writing new Answer:', questions.columns, key='ans_col')
+                    
+            # Select range of questions
+            q_range = st.form(key='range_form')
+            with q_range:
+                if questions is not None:
+                    q_start, q_end = st.slider('Select range of questions:', 0, len(questions), (0, len(questions)))
+                else:
+                    q_start, q_end = 0, 0
+                st.text_input(label='Set name of answered Excel output File', key='file_version')
+                q_range_btn = q_range.form_submit_button(label='Start generating QnA')
         
-    # --- Save Facts ------------------------------------------------------------------
-        if editable_form_btn:
-            save_qadb(st.session_state._llm_qst, 
-                      st.session_state.llm_ans, 
-                      st.session_state.facts_input,
-                      FACTS_JSON,)
-
-
-# QnA Generator -----------------------------------------------------------------
-def qna_generator_openai(context:str):
-    facts = context
-    # Prompting
-    prompt = prompting(facts)
-    # Call OpenAI
-    results = responding_openai(prompt)
-    # Split results into question and answer
-    _question, _answer = results.split('-----')
-    # Save to session state
-    st.session_state._question = _question
-    st.session_state._answer = _answer
-    # Display QnA
-    return _question, _answer
-
-# QnA Displaying -----------------------------------------------------------------
-def qna_display(_question, _answer):
-    col1, col2 = st.columns([1,2])
-    # Question edit
-    with col1:
-        edited_llm_qst = st.text_area('QstGenerator:', _question, height=200, key="_llm_qst")
-    # Answer edit
-    with col2:
-        edited_llm_ans = st.text_area('AnsGenerator:', _answer, height=200, key="llm_ans")
+            # Start generating QnA
+            if q_range_btn:
+                try:
+                    multiple_questions_generator(questions, raw_text, FACTS_DB, question_col, ans_col, q_start, q_end)
+                except UnboundLocalError:
+                    st.warning('Please upload context, questions, choose proper columns and set range of questions first!')
+                    st.stop()
+                    
+    # ------------------------------------------------------------------------------------
+        with subtab3: # Review
+            subtab31, subtab32 = st.tabs(['Table View', 'Question Review'])
+            with subtab31:
+                facts_table_view(FACTS_DB)
+            with subtab32:
+                facts_question_view(FACTS_DB)
+                             
+    # ------------------------------------------------------------------------------------
+        with subtab4: # Qdrant Uploader
+            # Define QDRANT_ID, API_KEY
+            qdrant_id()
+            # Define Context VectorDB, FAQ VectorDB tabs
+            subtab41, subtab42 = st.tabs(['Context VectorDB', 'FAQ VectorDB'])
+            # With Context VectorDB Tab
+            with subtab41:
+                ui_qdrant_context(raw_text)
+            # With FAQ VectorDB Tab
+            with subtab42:
+                ui_qdrant_faq(FACTS_DB)
     
-# Prompting ----------------------------------------------------------------------
-def prompting(facts):
-    _prompt = f"""
-    You act as a self question-answer master that gives a comprehensive simple pair of questions and answer based on the given context. \
-    By your experience, please provide me with a question that resembles a general or summary question.\
-    The final response follows this structure: question ----- answer. There are some examples below for your reference.\
-        
-    \nHuman: The structural pattern of Vietnam and its adjacent areas is dominated by two major\
-            fault systems: the NW-SE and NE-SW trending faults, co-existing with two other less dominant N-S and E-W trending systems.\
-            Even though the latter two are less developed and not as widespread, they also play an important role in the petroleum system of the region.
+def multiple_questions_generator(question_df, context, FACTS_DB, question_col, ans_col, q_start, q_end):
+    my_bar = st.progress(0, text='Answers Generating...')
+    with st.spinner(text='Generating Answers...'):
+        with st.expander("Questions and Answers", expanded=False):
+            for percent_complete in range(q_end - q_start):
+                for i in range(q_start, q_end):
+                    question = question_df.loc[i, question_col]
+                    question_df.loc[i,ans_col] = responding_claude(question, context
+                                                                    ).replace('<tag>', ''
+                                                                    ).replace('</tag>', '')
+                    st.info(f"Question {i}: \
+                            \n\nQ: {question}\
+                            \n\nA: {question_df.loc[i,ans_col]}\
+                            ")
+                    question_df.to_excel(f'{FACTS_DB}/{st.session_state.file_version}.xlsx', index=False)
+        my_bar.progress(percent_complete + 1)
     
-    \nAI: What are the two major fault systems of Vietnam and its adjacent areas? ----- The geological structure of Vietnam and surrounding areas\
-            is shaped primarily by two major fault systems running northwest-southeast and northeast-southwest. Additionally, two less dominant \
-            fault systems trending north-south and east-west exist in the region. While not as extensive, these minor systems also contribute \
-            significantly to the oil and gas systems in the area.\
-                
-    \nHuman: Vietnam lies between 8 o 30 N - 23 o 02 N, stretching from Lung Cu village (Dong Van district, Ha Giang province) \
-    in the North to Mui hamlet (Nam Can district, Ca Mau province) in the South. The length of the country is about four times\
-    that of its width. Its widest point is around 500 km (Mong Cai, Quang Ninh - Dien Bien) while the narrowest point is only \
-    50 km wide (the frontier of Viet - Laos to Dong Hoi, Quang Binh province) (Fig. 1.1 and 1.2). Vietnam’s mainland covers 329,229 km2.
-
-    \nAI: What is the geographical span of Vietnam? ----- The approximate width of Vietnam at its narrowest point is 50 km \
-        (from the frontier of Viet-Laos to Dong Hoi, Quang Binh province), while its widest point is around 500 km \
-        (from Mong Cai, Quang Ninh to Dien Bien).\
+    DatabaseLink(st.session_state.user_email).upload_overwrite()
+    st.success('Generated all QnAs!')
     
-    \nHuman: {facts}
+    pass
     
-    \nAI:
-    """
-    return _prompt
-
-#CHATPGT-RESPONSES-----------------------------------------------------------
-def responding_openai(prompt):
-    import openai
-    openai.api_key = os.getenv('OPENAI_API_KEY')
-    response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo-16k",
-                    messages=[{"role": "system", "content": "You act as a self question-answer master that gives a \
-                        comprehensive simple pair of questions and answer based on the given context. \
-                        By your experience, please provide me with a question that resembles a general or summary question.\
-                        The final response follows this structure: question ----- answer. There are some examples below for your reference."},
-                            {"role": "user", "content": prompt}],
-                    max_tokens = 2000,
-                    n=1,
-                    temperature=0.1,
-                    top_p=1,
-                )
-    results = response.choices[0].message.content
-    chatgpt_tokens = response.usage.total_tokens
-    return results
-
-
-
-    
-
+def ui_title():
+    st.write(f'''<div style="text-align: center;">
+                <h5 style="color: #1D5B79;
+                            font-size: 40px; 
+                            font-weight: bold;
+                ">
+                Multiple Questions Generator</h5>
+                </div>
+            ''',
+                unsafe_allow_html=True)
