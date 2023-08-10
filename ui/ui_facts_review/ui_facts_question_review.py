@@ -36,15 +36,16 @@ def facts_question_view(FACTS_DB):
                          )
         edit_form_submit = edit_form.form_submit_button(label='Save')
         if edit_form_submit:
-            # Save to dataframe
-            read_df['Câu hỏi'][n_q] = st.session_state.question
-            read_df['Trả lời'][n_q] = st.session_state.answer
-            # Save to local
-            read_df.to_excel(file_path, index=False)
-            print(f'Saved question {n_q} to file {file_path}')
-            # Sync to SharePoint
-            upload_single_file(file_path)
-            print(f'Synced question {n_q} to SharePoint')
+            with st.spinner(text='Saving...'):
+                # Save to dataframe
+                read_df['Câu hỏi'][n_q] = st.session_state.question
+                read_df['Trả lời'][n_q] = st.session_state.answer
+                # Save to local
+                read_df.to_excel(file_path, index=False)
+                print(f'Saved question {n_q} to file {file_path}')
+                # Sync to SharePoint
+                upload_single_file(file_path)
+                print(f'Synced question {n_q} to SharePoint')
             st.success(f'Saved and synchronized!')
         
         # Download Excel file

@@ -76,7 +76,6 @@ class DatabaseLink():
         pass
     
     def local_folders_list(self):
-        print(f'\n1n\n{self.local_path}')
         self.local_folders = []
         for root, dirs, files in os.walk(self.local_path):
             for dir in dirs:

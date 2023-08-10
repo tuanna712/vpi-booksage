@@ -1,4 +1,5 @@
 import streamlit as st
+from functions.sharepoint_uploader import *
 
 
 def add_logo():
@@ -36,3 +37,6 @@ def login():
     if 'user_email' in st.session_state and st.session_state.user_email != '':
         st.session_state.user = st.session_state.user_email.split("@")[0]
         st.success(f'Logged in as: {st.session_state.user}')
+        if st.button('SyncData from SP'):
+            with st.spinner('Sync...'):
+                DatabaseLink(st.session_state.user_email).download_overwrite()

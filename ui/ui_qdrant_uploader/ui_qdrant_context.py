@@ -13,7 +13,8 @@ def ui_qdrant_context(raw_text):
 def column_1(raw_text):
     if st.button('Upload', key='context_uploader'):
         with st.spinner(text='Uploading...'):
-            qdrant_context_uploader(raw_text, st.session_state.lang)
+            if len(st.session_state.qdrant_url)>0 and len(st.session_state.qdrant_api_key)>0:
+                qdrant_context_uploader(raw_text, st.session_state.lang)
             ingestion_context(raw_text, st.session_state.lang)
         st.success('Uploaded to QDRANT!')
 
